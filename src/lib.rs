@@ -211,14 +211,20 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         self.hderef(curr).value.is_some()
     }
 
+    /// Returns an iterator over the key-value pairs in the trie.
+    /// 
     pub fn iter(&self) -> KeyValueIter<V, RANGE, BASE_CHAR> {
         KeyValueIter::new(self)
     }
 
-    pub fn values(&self) -> impl Iterator<Item = &V> {
-        self.values.iter().filter_map(|v| v.as_ref())
+    /// Returns an iterator over the values in the trie.
+    /// 
+    pub fn values(&self) -> ValuesIter<V, RANGE, BASE_CHAR> {
+        ValuesIter::new(self)
     }
 
+    /// Returns an iterator over the keys in the trie.
+    /// 
     pub fn keys(&self) -> KeysIter<V, RANGE, BASE_CHAR> {
         KeysIter::new(self)
     }
@@ -352,38 +358,6 @@ impl<'a, V, const R: usize, const B: u8> IntoIterator
     }
 }
 
-struct KeysIterator<V, const R: usize, const B: u8> {
-    trie  : TrieMap<V, R, B>,
-    stack : Vec<(NodeHandle, usize)>,
-    key   : Vec<u8>,
-}
-
-impl<V, const R: usize, const B: u8> Iterator for KeysIterator<V, R, B> {
-    type Item = Box<[u8]>;
-
-    fn next(&mut self) -> Option<Self::Item> {
-        while let Some((handle, mut i)) = self.stack.pop() {
-            if self.trie.hderef(handle).value.is_some() && i == 0 {
-                self.trie.hderef_mut(handle).value = None;
-                self.stack.push((handle, 0));
-                return Some(self.key.clone().into_boxed_slice());
-            }
-            while i < R && self.trie.hderef(handle).brats[i].is_none() {
-                i += 1;
-            }
-            if i < R {
-                let brat = self.trie.hderef(handle).brats[i].unwrap();
-                self.key.push(i as u8 + B);
-                self.stack.push((handle, i + 1));
-                self.stack.push((brat, 0));
-            } else {
-                self.key.pop();
-            }
-        }
-        None
-    }
-}
-
 pub struct KeysIter<'a, V, const R: usize, const B: u8> {
     trie  : &'a TrieMap<V, R, B>,
     stack : Vec<(NodeHandle, usize, bool)>,
@@ -422,6 +396,26 @@ impl<'a, V, const R: usize, const B: u8> Iterator for KeysIter<'a, V, R, B> {
         None
     }
 }
+
+pub struct ValuesIter<'a, V, const R: usize, const B: u8> {
+    trie  : &'a TrieMap<V, R, B>,
+    idx   : usize,
+}
+impl<'a, V, const R: usize, const B: u8> ValuesIter<'a, V, R, B> {
+    fn new(trie: &'a TrieMap<V, R, B>) -> Self {
+        Self { trie, idx: 0 }
+    }
+}
+
+impl<'a, V, const R: usize, const B: u8> Iterator for ValuesIter<'a, V, R, B> {
+    type Item = &'a V;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.idx += 1;
+        self.trie.values[self.idx - 1].as_ref()
+    }
+}
+
 
 
 #[cfg(test)]
