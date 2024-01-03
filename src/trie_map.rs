@@ -111,8 +111,34 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: AsRef<[u8]>,
     {
+        self.contains_by_iter(key.as_ref())
+    }
+
+    /// Returns `true` if the trie contains a value at the given key, otherwise
+    /// `false` is returned. The trait bound on `K` is makes it easy to pass an
+    /// iterator or other type that can be converted into an iterator as a
+    /// paramter.
+    /// ```
+    /// use trie_map::TrieMap;
+    /// use std::collections::VecDeque;
+    /// 
+    /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+    /// 
+    /// trie.insert(b"hello", 1);
+    /// 
+    /// let mut window = b"hhell".iter().copied().collect::<VecDeque<_>>();
+    /// 
+    /// window.pop_front();
+    /// window.push_back(b'o');
+    /// 
+    /// assert_eq!(trie.contains_by_iter(window.range(0..5)), true);
+    /// ```
+    pub fn contains_by_iter<'a, K>(&self, key: K) -> bool
+    where
+        K: IntoIterator<Item=&'a u8>,
+    {
         let mut curr = self.root;
-        for b in key.as_ref() {
+        for b in key {
             let idx = (b - BASE_CHAR) as usize;
             if let Some(next) = self.hderef(curr).child[idx] {
                 curr = next;
@@ -448,6 +474,23 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// ```
     pub fn len(&self) -> usize {
         self.len
+    }
+
+    /// Returns `true` if the trie contains no values, otherwise `false` is
+    /// returned.
+    /// ```
+    /// use trie_map::TrieMap;
+    /// 
+    /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::with_capacity(10);
+    /// 
+    /// assert_eq!(trie.is_empty(), true);
+    /// 
+    /// trie.insert(b"hello", 1);
+    /// 
+    /// assert_eq!(trie.is_empty(), false);
+    /// ```
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
     }
 
     /// Removes a value from the trie at the given key, if it exists, and
