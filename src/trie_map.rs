@@ -102,9 +102,9 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// trie.insert(b"hello", 1);
+    /// trie.insert("hello", 1);
     ///
-    /// assert_eq!(trie.contains(b"hello"), true);
+    /// assert_eq!(trie.contains("hello"), true);
     /// ```
     ///
     pub fn contains<K>(&self, key: K) -> bool
@@ -214,11 +214,11 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// trie.insert(b"hello", 1);
+    /// trie.insert("hello", 1);
     ///
-    /// *trie.get_mut(b"hello").unwrap() = 17;
+    /// *trie.get_mut("hello").unwrap() = 17;
     ///
-    /// assert_eq!(trie.get(b"hello"), Some(&17));
+    /// assert_eq!(trie.get("hello"), Some(&17));
     /// ```
     pub fn get_mut<K>(&mut self, key: K) -> Option<&mut V>
     where
@@ -269,7 +269,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// assert_eq!(trie.get_or_insert(b"hello", 1), &1);
+    /// assert_eq!(trie.get_or_insert("hello", 1), &1);
     /// ```
     pub fn get_or_insert<K>(&mut self, key: K, value: V) -> &mut V
     where
@@ -308,7 +308,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// assert_eq!(trie.get_or_insert_with(b"hello", ||1), &1);
+    /// assert_eq!(trie.get_or_insert_with("hello", ||1), &1);
     /// ```
     ///
     pub fn get_or_insert_with<K, F>(&mut self, key: K, f: F) -> &mut V
@@ -372,9 +372,9 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// trie.insert(b"hello", 1);
+    /// trie.insert("hello", 1);
     ///
-    /// assert_eq!(trie.get(b"hello"), Some(&1));
+    /// assert_eq!(trie.get("hello"), Some(&1));
     /// ```
     pub fn insert<K>(&mut self, key: K, value: V)
     where
@@ -414,8 +414,8 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// trie.insert(b"hello", 1);
-    /// trie.insert(b"world", 2);
+    /// trie.insert("hello", 1);
+    /// trie.insert("world", 2);
     ///
     /// let mut iter  = trie.iter();
     /// let     first = iter.next().unwrap();
@@ -435,14 +435,14 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// trie.insert(b"hello", 1);
-    /// trie.insert(b"world", 2);
+    /// trie.insert("hello", 1);
+    /// trie.insert("world", 2);
     ///
     /// let mut iter  = trie.iter_mut();
     /// let     first = iter.next().unwrap();
     /// *first.1 = 17;
     ///
-    /// assert_eq!(trie.get(b"hello"), Some(&17));
+    /// assert_eq!(trie.get("hello"), Some(&17));
     /// ```
     pub fn iter_mut(&mut self) -> IterMut<V, RANGE, BASE_CHAR> {
         IterMut::new(self)
@@ -454,7 +454,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// trie.insert(b"hello", 1);
+    /// trie.insert("hello", 1);
     ///
     /// assert_eq!(trie.keys().next().unwrap().as_ref(), b"hello");
     /// ```
@@ -468,7 +468,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::with_capacity(10);
     ///
-    /// trie.insert(b"hello", 1);
+    /// trie.insert("hello", 1);
     ///
     /// assert_eq!(trie.len(), 1);
     /// ```
@@ -485,7 +485,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// 
     /// assert_eq!(trie.is_empty(), true);
     /// 
-    /// trie.insert(b"hello", 1);
+    /// trie.insert("hello", 1);
     /// 
     /// assert_eq!(trie.is_empty(), false);
     /// ```
