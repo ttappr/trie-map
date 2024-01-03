@@ -20,7 +20,7 @@
                     "kind": "lib"
                 }
             },
-            "args": [],
+            "args": ["--nocapture", "--test-threads=1"],
             "cwd": "${workspaceFolder}"
         }
     ]
