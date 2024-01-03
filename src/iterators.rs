@@ -23,20 +23,16 @@ trait InnerIter<V, const R: usize, const B: u8> {
     /// 
     fn key(&mut self) -> &mut Vec<u8>;
     
-    /// Returns a reference to the iterator's trie's values field.
-    /// 
-    fn values(&self) -> &Vec<Option<V>>;
-    
     /// Invokes the iterator's trie's hderef method.
     /// 
     fn hderef(&self, handle: NodeHandle) -> &Node<R>;
     
     /// Invoked on the iterator to get it to produce the next iterator item.
     /// 
-    fn iter_item<'a>(&'a mut self, 
-                     hcurr : NodeHandle,
-                     hval  : ValueHandle,
-                     key   : Box<[u8]>  ) -> Option<Self::Item>;
+    fn iter_item(&mut self, 
+                 hcurr : NodeHandle,
+                 hval  : ValueHandle,
+                 key   : Box<[u8]>  ) -> Option<Self::Item>;
 
     /// The core of the traversal algorithm. This method is invoked by the
     /// iterator's next method. Each iterator implements Iterator and its 
@@ -130,18 +126,14 @@ impl<V, const R: usize, const B: u8> InnerIter<V, R, B> for IntoIter<V, R, B> {
         &mut self.key
     }
     #[inline]
-    fn values(&self) -> &Vec<Option<V>> {
-        &self.trie.values
-    }
-    #[inline]
     fn hderef(&self, handle: NodeHandle) -> &Node<R> {
         self.trie.hderef(handle)
     }
     #[inline]
-    fn iter_item<'a>(&'a mut self, 
-                     hcurr : NodeHandle,
-                     hval  : ValueHandle,
-                     key   : Box<[u8]>  ) -> Option<Self::Item> {
+    fn iter_item(&mut self, 
+                 hcurr : NodeHandle,
+                 hval  : ValueHandle,
+                 key   : Box<[u8]>  ) -> Option<Self::Item> {
         self.trie.nodes[hcurr.0].value = None;
         Some((key, self.trie.values[hval.0].take().unwrap()))
     }
@@ -200,18 +192,14 @@ impl<'a, V, const R: usize, const B: u8>
         &mut self.key
     }
     #[inline]
-    fn values(&self) -> &Vec<Option<V>> {
-        &self.trie.values
-    }
-    #[inline]
     fn hderef(&self, handle: NodeHandle) -> &Node<R> {
         self.trie.hderef(handle)
     }
     #[inline]
-    fn iter_item<'b>(&'b mut self, 
-                     _hcurr : NodeHandle,
-                     hval   : ValueHandle,
-                     key    : Box<[u8]>  ) -> Option<Self::Item> {
+    fn iter_item(&mut self, 
+                 _hcurr : NodeHandle,
+                 hval   : ValueHandle,
+                 key    : Box<[u8]>  ) -> Option<Self::Item> {
         let value = self.trie.values[hval.0].as_ref().unwrap();
         Some((key, value))
     }
@@ -271,10 +259,6 @@ impl<'a, V, const R: usize, const B: u8>
     #[inline]
     fn key(&mut self) -> &mut Vec<u8> {
         &mut self.key
-    }
-    #[inline]
-    fn values(&self) -> &Vec<Option<V>> {
-        &self.trie.values
     }
     #[inline]
     fn hderef(&self, handle: NodeHandle) -> &Node<R> {
