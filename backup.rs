@@ -589,6 +589,15 @@ impl<V, const R: usize, const B: u8> Default for TrieMap<V, R, B> {
     }
 }
 
+#[allow(dead_code)]
+enum IterItem<'a, V, const R: usize, const B: u8> {
+    RefItem((Box<[u8]>, &'a V)),
+    RefMutItem((Box<[u8]>, &'a mut V)),
+    OwnedItem((Box<[u8]>, V)),
+    None
+}
+
+#[allow(dead_code)]
 trait InnerIter<V, const R: usize, const B: u8> {
     type Item;
 
@@ -601,9 +610,8 @@ trait InnerIter<V, const R: usize, const B: u8> {
     fn hderef(&self, handle: NodeHandle) -> &Node<R>;
     
     fn iter_item<'a>(&'a mut self, 
-                     hcurr : NodeHandle,
-                     hval  : ValueHandle,
-                     key   : Box<[u8]>  ) -> Option<Self::Item>;
+                     hval : ValueHandle,
+                     key  : Box<[u8]>  ) -> Option<Self::Item>;
 
     fn inner_next(&mut self) -> Option<Self::Item> {
         if let Some(next) = self.stack().last_mut() {
@@ -611,20 +619,20 @@ trait InnerIter<V, const R: usize, const B: u8> {
                 next.1 = 0;
             }
         }
-        while let Some((hcurr, mut i, _b)) = self.stack().pop() {
-            if self.hderef(hcurr).value.is_some() && i == 0 {
-                self.stack().push((hcurr, 0, false));
-                let hval  = self.hderef(hcurr).value.unwrap();
+        while let Some((handle, mut i, _b)) = self.stack().pop() {
+            if self.hderef(handle).value.is_some() && i == 0 {
+                self.stack().push((handle, 0, false));
+                let hval  = self.hderef(handle).value.unwrap();
                 let key   = self.key().clone().into_boxed_slice();
-                return self.iter_item(hcurr, hval, key)
+                return self.iter_item(hval, key)
             }
-            while i < R && self.hderef(hcurr).child[i].is_none() {
+            while i < R && self.hderef(handle).child[i].is_none() {
                 i += 1;
             }
             if i < R {
-                let child = self.hderef(hcurr).child[i].unwrap();
+                let child = self.hderef(handle).child[i].unwrap();
                 self.key().push(i as u8 + B);
-                self.stack().push((hcurr, i + 1, false));
+                self.stack().push((handle, i + 1, false));
                 self.stack().push((child, 0, true));
             } else {
                 self.key().pop();
@@ -632,27 +640,25 @@ trait InnerIter<V, const R: usize, const B: u8> {
         }
         None
     }
-
     fn inner_next_back(&mut self) -> Option<Self::Item> {
         if let Some(next) = self.stack().last_mut() {
             if next.1 == usize::MAX {
                 next.1 = R;
             }
         }
-        while let Some((hcurr, mut i, _b)) = self.stack().pop() {
-            while i > 0 && self.hderef(hcurr).child[i - 1].is_none() {
+        while let Some((handle, mut i, _b)) = self.stack().pop() {
+            while i > 0 && self.hderef(handle).child[i - 1].is_none() {
                 i -= 1;
             }
             if i > 0 {
-                let child = self.hderef(hcurr).child[i - 1].unwrap();
+                let child = self.hderef(handle).child[i - 1].unwrap();
                 self.key().push(i as u8 + B - 1);
-                self.stack().push((hcurr, i - 1, true));
+                self.stack().push((handle, i - 1, true));
                 self.stack().push((child, R, true));
-            } else if self.hderef(hcurr).value.is_some() {
-                let hval  = self.hderef(hcurr).value.unwrap();
+            } else if self.hderef(handle).value.is_some() {
+                let hval  = self.hderef(handle).value.unwrap();
                 let key   = self.key().clone().into_boxed_slice();
-                self.key().pop();
-                return self.iter_item(hcurr, hval, key)
+                return self.iter_item(hval, key)
             } else {
                 self.key().pop();
             }
@@ -690,10 +696,9 @@ impl<V, const R: usize, const B: u8> InnerIter<V, R, B> for IntoIter<V, R, B> {
         self.trie.hderef(handle)
     }
     fn iter_item<'a>(&'a mut self, 
-                     hcurr : NodeHandle,
-                     hval  : ValueHandle,
-                     key   : Box<[u8]>  ) -> Option<Self::Item> {
-        self.trie.nodes[hcurr.0].value = None;
+                     hval : ValueHandle,
+                     key  : Box<[u8]>  ) -> Option<Self::Item> {
+        //self.trie.values[hval.0] = None;
         Some((key, self.trie.values[hval.0].take().unwrap()))
     }
 }
@@ -711,6 +716,73 @@ impl<V, const R: usize, const B: u8> DoubleEndedIterator for IntoIter<V, R, B> {
         self.inner_next_back()
     }
 }
+
+/*
+impl<V, const R: usize, const B: u8> Iterator for IntoIter<V, R, B> {
+    type Item = (Box<[u8]>, V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        if let Some(next) = self.stack.last_mut() {
+            if next.1 == usize::MAX {
+                next.1 = 0;
+            }
+        }
+        while let Some((handle, mut i, _b)) = self.stack.pop() {
+            if self.trie.hderef(handle).value.is_some() && i == 0 {
+                self.stack.push((handle, 0, false));
+                let hval  = self.trie.hderef_mut(handle).value.take().unwrap();
+                let value = self.trie.values[hval.0].take().unwrap();
+                let key   = self.key.clone().into_boxed_slice();
+                return Some((key, value));
+            }
+            while i < R && self.trie.hderef(handle).child[i].is_none() {
+                i += 1;
+            }
+            if i < R {
+                let child = self.trie.hderef(handle).child[i].unwrap();
+                self.key.push(i as u8 + B);
+                self.stack.push((handle, i + 1, false));
+                self.stack.push((child, 0, true));
+            } else {
+                self.key.pop();
+            }
+        }
+        None
+    }
+}
+
+impl<V, const R: usize, const B: u8>
+    DoubleEndedIterator for IntoIter<V, R, B>
+{
+    fn next_back(&mut self) -> Option<Self::Item> {
+        if let Some(next) = self.stack.last_mut() {
+            if next.1 == usize::MAX {
+                next.1 = R;
+            }
+        }
+        while let Some((handle, mut i, _b)) = self.stack.pop() {
+            while i > 0 && self.trie.hderef(handle).child[i - 1].is_none() {
+                i -= 1;
+            }
+            if i > 0 {
+                let child = self.trie.hderef(handle).child[i - 1].unwrap();
+                self.key.push(i as u8 + B - 1);
+                self.stack.push((handle, i - 1, true));
+                self.stack.push((child, R, true));
+            } else if self.trie.hderef(handle).value.is_some() {
+                let hval  = self.trie.hderef_mut(handle).value.take().unwrap();
+                let value = self.trie.values[hval.0].take().unwrap();
+                let key   = self.key.clone().into_boxed_slice();
+                self.key.pop();
+                return Some((key, value));
+            } else {
+                self.key.pop();
+            }
+        }
+        None
+    }
+}
+*/
 
 impl<V, const R: usize, const B: u8> IntoIterator for TrieMap<V, R, B> {
     type Item = (Box<[u8]>, V);
