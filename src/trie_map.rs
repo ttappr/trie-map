@@ -486,6 +486,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
                 return None;
             }
         }
+        // Clean up the nodes that are no longer needed.
         if let Some(hvalue) = self.hderef(hcurr).value {
             self.hderef_mut(hcurr).value = None;
             self.del_value(hvalue);
@@ -585,6 +586,143 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
 impl<V, const R: usize, const B: u8> Default for TrieMap<V, R, B> {
     fn default() -> Self {
         Self::new()
+    }
+}
+
+#[allow(dead_code)]
+enum IterTrie<'a, V, const R: usize, const B: u8> {
+    Ref(&'a TrieMap<V, R, B>),
+    RefMut(&'a mut TrieMap<V, R, B>),
+    Owned(TrieMap<V, R, B>),
+}
+#[allow(dead_code)]
+enum IterItem<'a, V, const R: usize, const B: u8> {
+    RefItem((Box<[u8]>, &'a V)),
+    RefMutItem((Box<[u8]>, &'a mut V)),
+    OwnedItem((Box<[u8]>, V)),
+    None
+}
+#[allow(dead_code)]
+impl<'a, V, const R: usize, const B: u8> IterTrie<'a, V, R, B> {
+    fn hderef(&self, handle: NodeHandle) -> &Node<R> {
+        match self {
+            Self::Ref(trie)    => trie.hderef(handle),
+            Self::RefMut(trie) => trie.hderef(handle),
+            Self::Owned(trie)  => trie.hderef(handle),
+        }
+    }
+    fn hderef_mut(&mut self, handle: NodeHandle) -> &mut Node<R> {
+        match self {
+            Self::Ref(_)       => unimplemented!(),
+            Self::RefMut(trie) => trie.hderef_mut(handle),
+            Self::Owned(trie)  => trie.hderef_mut(handle),
+        }
+    }
+    fn root(&self) -> NodeHandle {
+        match self {
+            Self::Ref(trie)    => trie.root,
+            Self::RefMut(trie) => trie.root,
+            Self::Owned(trie)  => trie.root,
+        }
+    }
+}
+
+#[allow(dead_code)]
+struct InternalIter<'a, V, const R: usize, const B: u8> {
+    trie  : IterTrie<'a, V, R, B>,
+    key   : Vec<u8>,
+    stack : Vec<(NodeHandle, usize, bool)>,
+}
+#[allow(dead_code)]
+impl<'a, V, const R: usize, const B: u8> InternalIter<'a, V, R, B> {
+    fn new(trie: IterTrie<'a, V, R, B>) -> Self {
+        let curr  = trie.root();
+        let stack = vec![(curr, usize::MAX, true)];
+        Self { trie, key: Vec::new(), stack }
+    }
+    fn next(&mut self) -> IterItem<'a, V, R, B> {
+        use {IterItem::*, IterTrie::*, std::mem::transmute as tm};
+        if let Some(next) = self.stack.last_mut() {
+            if next.1 == usize::MAX {
+                next.1 = 0;
+            }
+        }
+        while let Some((handle, mut i, b)) = self.stack.pop() {
+            if self.trie.hderef(handle).value.is_some() && i == 0 {
+                self.stack.push((handle, 0, false));
+                let hval  = self.trie.hderef_mut(handle).value.take().unwrap();
+                let key   = self.key.clone().into_boxed_slice();
+                match &mut self.trie {
+                    Ref(trie) => {
+                        let v = trie.values[hval.0].as_ref().unwrap();
+                        return RefItem((key, v));
+                    },
+                    RefMut(trie) => {
+                        let v = trie.values[hval.0].as_mut().unwrap();
+                        let v = unsafe { tm::<&mut V, &'a mut V>(v) };
+                        return RefMutItem((key, v));
+                                
+                    },
+                    Owned(trie) => {
+                        let v = trie.values[hval.0].take().unwrap();
+                        return OwnedItem((key, v));
+                    },
+                }
+            }
+            while i < R && self.trie.hderef(handle).child[i].is_none() {
+                i += 1;
+            }
+            if i < R {
+                let child = self.trie.hderef(handle).child[i].unwrap();
+                self.key.push(i as u8 + B);
+                self.stack.push((handle, i + 1, false));
+                self.stack.push((child, 0, true));
+            } else {
+                self.key.pop();
+            }
+        }
+        None
+    }
+    fn next_back(&mut self) -> IterItem<'a, V, R, B> {
+        use {IterItem::*, IterTrie::*, std::mem::transmute as tm};
+        if let Some(next) = self.stack.last_mut() {
+            if next.1 == usize::MAX {
+                next.1 = R;
+            }
+        }
+        while let Some((handle, mut i, b)) = self.stack.pop() {
+            while i > 0 && self.trie.hderef(handle).child[i - 1].is_none() {
+                i -= 1;
+            }
+            if i > 0 {
+                let child = self.trie.hderef(handle).child[i - 1].unwrap();
+                self.key.push(i as u8 + B - 1);
+                self.stack.push((handle, i - 1, true));
+                self.stack.push((child, R, true));
+            } else if self.trie.hderef(handle).value.is_some() {
+                let hval  = self.trie.hderef_mut(handle).value.take().unwrap();
+                let key   = self.key.clone().into_boxed_slice();
+                match &mut self.trie {
+                    Ref(trie) => {
+                        let v = trie.values[hval.0].as_ref().unwrap();
+                        return RefItem((key, v));
+                    },
+                    RefMut(trie) => {
+                        let v = trie.values[hval.0].as_mut().unwrap();
+                        let v = unsafe { tm::<&mut V, &'a mut V>(v) };
+                        return RefMutItem((key, v));
+                                
+                    },
+                    Owned(trie) => {
+                        let v = trie.values[hval.0].take().unwrap();
+                        return OwnedItem((key, v));
+                    },
+                }
+            } else {
+                self.key.pop();
+            }
+        }
+        None
     }
 }
 
