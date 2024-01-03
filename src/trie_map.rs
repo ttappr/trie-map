@@ -611,8 +611,8 @@ trait InnerIter<V, const R: usize, const B: u8> {
                 next.1 = 0;
             }
         }
-        while let Some((hcurr, mut i, _b)) = self.stack().pop() {
-            if self.hderef(hcurr).value.is_some() && i == 0 {
+        while let Some((hcurr, mut i, b)) = self.stack().pop() {
+            if self.hderef(hcurr).value.is_some() && b {
                 self.stack().push((hcurr, 0, false));
                 let hval  = self.hderef(hcurr).value.unwrap();
                 let key   = self.key().clone().into_boxed_slice();
@@ -639,7 +639,7 @@ trait InnerIter<V, const R: usize, const B: u8> {
                 next.1 = R;
             }
         }
-        while let Some((hcurr, mut i, _b)) = self.stack().pop() {
+        while let Some((hcurr, mut i, b)) = self.stack().pop() {
             while i > 0 && self.hderef(hcurr).child[i - 1].is_none() {
                 i -= 1;
             }
@@ -648,7 +648,7 @@ trait InnerIter<V, const R: usize, const B: u8> {
                 self.key().push(i as u8 + B - 1);
                 self.stack().push((hcurr, i - 1, true));
                 self.stack().push((child, R, true));
-            } else if self.hderef(hcurr).value.is_some() {
+            } else if self.hderef(hcurr).value.is_some() && b {
                 let hval  = self.hderef(hcurr).value.unwrap();
                 let key   = self.key().clone().into_boxed_slice();
                 self.key().pop();
@@ -734,36 +734,37 @@ impl<'a, V, const R: usize, const B: u8> Iter<'a, V, R, B> {
     }
 }
 
+impl<'a, V, const R: usize, const B: u8> 
+    InnerIter<V, R, B> for Iter<'a, V, R, B> 
+{
+    type Item = (Box<[u8]>, &'a V);
+
+    fn stack(&mut self) -> &mut Vec<(NodeHandle, usize, bool)> {
+        &mut self.stack
+    }
+    fn key(&mut self) -> &mut Vec<u8> {
+        &mut self.key
+    }
+    fn values(&self) -> &Vec<Option<V>> {
+        &self.trie.values
+    }
+    fn hderef(&self, handle: NodeHandle) -> &Node<R> {
+        self.trie.hderef(handle)
+    }
+    fn iter_item<'b>(&'b mut self, 
+                     _hcurr : NodeHandle,
+                     hval   : ValueHandle,
+                     key    : Box<[u8]>  ) -> Option<Self::Item> {
+        let value = self.trie.values[hval.0].as_ref().unwrap();
+        Some((key, value))
+    }
+}
+
 impl<'a, V, const R: usize, const B: u8> Iterator for Iter<'a, V, R, B> {
     type Item = (Box<[u8]>, &'a V);
 
     fn next(&mut self) -> Option<Self::Item> {
-        if let Some(next) = self.stack.last_mut() {
-            if next.1 == usize::MAX {
-                next.1 = 0;
-            }
-        }
-        while let Some((handle, mut i, b)) = self.stack.pop() {
-            if self.trie.hderef(handle).value.is_some() && b {
-                self.stack.push((handle, 0, false));
-                let hval  = self.trie.hderef(handle).value.as_ref().unwrap();
-                let value = self.trie.values[hval.0].as_ref().unwrap();
-                let key   = self.key.clone().into_boxed_slice();
-                return Some((key, value));
-            }
-            while i < R && self.trie.hderef(handle).child[i].is_none() {
-                i += 1;
-            }
-            if i < R {
-                let child = self.trie.hderef(handle).child[i].unwrap();
-                self.key.push(i as u8 + B);
-                self.stack.push((handle, i + 1, false));
-                self.stack.push((child, 0, true));
-            } else {
-                self.key.pop();
-            }
-        }
-        None
+        self.inner_next()
     }
 }
 
@@ -771,31 +772,7 @@ impl<'a, V, const R: usize, const B: u8>
     DoubleEndedIterator for Iter<'a, V, R, B>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
-        if let Some(next) = self.stack.last_mut() {
-            if next.1 == usize::MAX {
-                next.1 = R;
-            }
-        }
-        while let Some((handle, mut i, b)) = self.stack.pop() {
-            while i > 0 && self.trie.hderef(handle).child[i - 1].is_none() {
-                i -= 1;
-            }
-            if i > 0 {
-                let child = self.trie.hderef(handle).child[i - 1].unwrap();
-                self.key.push(i as u8 + B - 1);
-                self.stack.push((handle, i - 1, true));
-                self.stack.push((child, R, true));
-            } else if self.trie.hderef(handle).value.is_some() && b {
-                let hval  = self.trie.hderef(handle).value.as_ref().unwrap();
-                let value = self.trie.values[hval.0].as_ref().unwrap();
-                let key   = self.key.clone().into_boxed_slice();
-                self.key.pop();
-                return Some((key, value));
-            } else {
-                self.key.pop();
-            }
-        }
-        None
+        self.inner_next_back()
     }
 }
 
@@ -822,38 +799,40 @@ impl<'a, V, const R: usize, const B: u8> IterMut<'a, V, R, B> {
     }
 }
 
+impl<'a, V, const R: usize, const B: u8> 
+    InnerIter<V, R, B> for IterMut<'a, V, R, B> 
+{
+    type Item = (Box<[u8]>, &'a mut V);
+
+    fn stack(&mut self) -> &mut Vec<(NodeHandle, usize, bool)> {
+        &mut self.stack
+    }
+    fn key(&mut self) -> &mut Vec<u8> {
+        &mut self.key
+    }
+    fn values(&self) -> &Vec<Option<V>> {
+        &self.trie.values
+    }
+    fn hderef(&self, handle: NodeHandle) -> &Node<R> {
+        self.trie.hderef(handle)
+    }
+    fn iter_item<'b>(&'b mut self, 
+                     _hcurr : NodeHandle,
+                     hval   : ValueHandle,
+                     key    : Box<[u8]>  ) -> Option<Self::Item> {
+        use std::mem::transmute;
+        let value = self.trie.values[hval.0].as_mut().unwrap();
+        let value = unsafe { transmute::<&mut V, &'a mut V>(value) };
+        Some((key, value))
+    }
+}
+
+
 impl<'a, V, const R: usize, const B: u8> Iterator for IterMut<'a, V, R, B> {
     type Item = (Box<[u8]>, &'a mut V);
 
     fn next(&mut self) -> Option<Self::Item> {
-        use std::mem::transmute;
-        if let Some(next) = self.stack.last_mut() {
-            if next.1 == usize::MAX {
-                next.1 = 0;
-            }
-        }
-        while let Some((hnode, mut i, b)) = self.stack.pop() {
-            if self.trie.hderef(hnode).value.is_some() && b {
-                self.stack.push((hnode, 0, false));
-                let hval  = self.trie.hderef(hnode).value.unwrap();
-                let value = self.trie.values[hval.0].as_mut().unwrap();
-                let value = unsafe { transmute::<&mut V, &'a mut V>(value) };
-                let key   = self.key.clone().into_boxed_slice();
-                return Some((key, value));
-            }
-            while i < R && self.trie.hderef(hnode).child[i].is_none() {
-                i += 1;
-            }
-            if i < R {
-                let child = self.trie.hderef(hnode).child[i].unwrap();
-                self.key.push(i as u8 + B);
-                self.stack.push((hnode, i + 1, false));
-                self.stack.push((child, 0, true));
-            } else {
-                self.key.pop();
-            }
-        }
-        None
+        self.inner_next()
     }
 }
 
@@ -861,33 +840,7 @@ impl<'a, V, const R: usize, const B: u8>
     DoubleEndedIterator for IterMut<'a, V, R, B>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
-        use std::mem::transmute;
-        if let Some(next) = self.stack.last_mut() {
-            if next.1 == usize::MAX {
-                next.1 = R;
-            }
-        }
-        while let Some((handle, mut i, b)) = self.stack.pop() {
-            while i > 0 && self.trie.hderef(handle).child[i - 1].is_none() {
-                i -= 1;
-            }
-            if i > 0 {
-                let child = self.trie.hderef(handle).child[i - 1].unwrap();
-                self.key.push(i as u8 + B - 1);
-                self.stack.push((handle, i - 1, true));
-                self.stack.push((child, R, true));
-            } else if self.trie.hderef(handle).value.is_some() && b {
-                let hval  = self.trie.hderef(handle).value.unwrap();
-                let value = self.trie.values[hval.0].as_mut().unwrap();
-                let value = unsafe { transmute::<&mut V, &'a mut V>(value) };
-                let key   = self.key.clone().into_boxed_slice();
-                self.key.pop();
-                return Some((key, value));
-            } else {
-                self.key.pop();
-            }
-        }
-        None
+        self.inner_next_back()
     }
 }
 
@@ -951,8 +904,6 @@ impl<'a, V, const R: usize, const B: u8> Iterator for Values<'a, V, R, B> {
         }
     }
 }
-
-
 
 #[cfg(test)]
 mod tests {
