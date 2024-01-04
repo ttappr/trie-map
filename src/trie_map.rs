@@ -212,8 +212,8 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
                 return None;
             }
         }
-        if let Some(value) = self.hderef(hcurr).value {
-            self.values[value.0].as_ref()
+        if let Some(hvalue) = self.hderef(hcurr).value {
+            self.values[hvalue.0].as_ref()
         } else {
             None
         }
@@ -266,8 +266,8 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
                 return None;
             }
         }
-        if let Some(value) = self.hderef(hcurr).value {
-            self.values[value.0].as_mut()
+        if let Some(hvalue) = self.hderef(hcurr).value {
+            self.values[hvalue.0].as_mut()
         } else {
             None
         }
@@ -607,9 +607,9 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     #[inline]
     fn new_value(&mut self, value: V) -> ValueHandle {
-        if let Some(handle) = self.value_bin.pop() {
-            self.values[handle.0] = Some(value);
-            handle
+        if let Some(hvalue) = self.value_bin.pop() {
+            self.values[hvalue.0] = Some(value);
+            hvalue
         } else {
             self.values.push(Some(value));
             self.len += 1;
