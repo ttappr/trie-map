@@ -662,6 +662,20 @@ mod tests {
     use super::*;
 
     #[test]
+    fn contains() {
+        let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+        trie.insert(b"hello", 1);
+
+        assert_eq!(trie.contains(b"hello"), true);
+        assert_eq!(trie.contains(b"world"), false);
+
+        trie.insert(b"world", 2);
+
+        assert_eq!(trie.contains(b"hello"), true);
+        assert_eq!(trie.contains(b"world"), true);
+    }
+
+    #[test]
     fn get() {
         let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
         trie.insert(b"hello", 1);
