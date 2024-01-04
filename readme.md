@@ -34,3 +34,32 @@ Internally, the key's bytes are iterated over to populate the trie. These
 bytes can be UTF-8/ASCII compatible characters, or they could represent
 anything suitable to a project's requirements so long as `RANGE` and
 `BASE_CHAR` are correctly specified.
+
+An idea on how to define keys that could hold a large character range while 
+keeping the trie nodes small: base32, or some other, encoding could be used - 
+keys encoded to digit characters and lowercase alpha. And since many of the 
+trie's methods will take an iterator for a key, encoding a key to perform a 
+lookup could be done by a custom encoding iterator that will stop once the trie 
+determines the lookup key is not in the trie.
+
+``` rust
+use trie_map::TrieMap;
+use pictures::PicFile;
+use my_encoders::Ascii26Encoder;
+
+let mut key_encoder = Ascii26Encoder::new();
+let mut trie        = TrieMap::<Picture, 26, b'a'>::new();
+
+let picture = PicFile::load("./arctic_fox.png");
+
+trie.insert(&key_encoder::iter_encode("Αρκτική αλεπού"), picture);
+
+// Encoding and lookup stop immediately, since "Pallas's Cat" isn't in the trie.
+assert_eq!(trie.contains(&key_encoder::iter_encode("Pallas's Cat")), false);
+
+assert_eq!(trie.contains(&key_encoder::iter_encode("Αρκτική αλεπού")), true);
+```
+
+The above is somewhat hypothetical, but it could be a workable strategy to
+keep the node sizes of the trie small while supporting an unlimited range of
+characters in the keys.
