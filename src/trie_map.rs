@@ -97,6 +97,16 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         }
     }
 
+    /// Clears the trie, removing all values.
+    /// 
+    pub fn clear(&mut self) {
+        self.nodes.clear();
+        self.values.clear();
+        self.node_bin.clear();
+        self.value_bin.clear();
+        self.len = 0;
+    }
+
     /// Returns `true` if the trie contains a value at the given key, otherwise
     /// `false` is returned.
     /// ```
@@ -139,16 +149,16 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: IntoIterator<Item=&'a u8>,
     {
-        let mut curr = self.root;
+        let mut hcurr = self.root;
         for b in key {
-            let idx = (b - BASE_CHAR) as usize;
-            if let Some(next) = self.hderef(curr).child[idx] {
-                curr = next;
+            let ichild = (b - BASE_CHAR) as usize;
+            if let Some(hnext) = self.hderef(hcurr).child[ichild] {
+                hcurr = hnext;
             } else {
                 return false;
             }
         }
-        self.hderef(curr).value.is_some()
+        self.hderef(hcurr).value.is_some()
     }
 
     /// Accesses a value in the trie at the given key, if it exists, a reference
@@ -193,16 +203,16 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: IntoIterator<Item=&'a u8>,
     {
-        let mut curr = self.root;
+        let mut hcurr = self.root;
         for b in key {
-            let idx = (b - BASE_CHAR) as usize;
-            if let Some(next) = self.hderef(curr).child[idx] {
-                curr = next;
+            let ichild = (b - BASE_CHAR) as usize;
+            if let Some(hnext) = self.hderef(hcurr).child[ichild] {
+                hcurr = hnext;
             } else {
                 return None;
             }
         }
-        if let Some(value) = self.hderef(curr).value {
+        if let Some(value) = self.hderef(hcurr).value {
             self.values[value.0].as_ref()
         } else {
             None
@@ -247,16 +257,16 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: IntoIterator<Item=&'a u8>,
     {
-        let mut curr = self.root;
+        let mut hcurr = self.root;
         for b in key {
-            let idx = (b - BASE_CHAR) as usize;
-            if let Some(next) = self.hderef(curr).child[idx] {
-                curr = next;
+            let ichild = (b - BASE_CHAR) as usize;
+            if let Some(hnext) = self.hderef(hcurr).child[ichild] {
+                hcurr = hnext;
             } else {
                 return None;
             }
         }
-        if let Some(value) = self.hderef(curr).value {
+        if let Some(value) = self.hderef(hcurr).value {
             self.values[value.0].as_mut()
         } else {
             None
@@ -345,13 +355,13 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     {
         let mut hcurr = self.root;
         for b in key {
-            let idx = (b - BASE_CHAR) as usize;
-            if let Some(next) = self.hderef(hcurr).child[idx] {
-                hcurr = next;
+            let ichild = (b - BASE_CHAR) as usize;
+            if let Some(hnext) = self.hderef(hcurr).child[ichild] {
+                hcurr = hnext;
             } else {
                 let hnew = self.new_node();
                 let curr = self.hderef_mut(hcurr);
-                curr.child[idx] = Some(hnew);
+                curr.child[ichild] = Some(hnew);
                 curr.len += 1;
                 hcurr = hnew;
             }
@@ -368,7 +378,9 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         self.values[hvalue.0].as_mut().unwrap()
     }
 
-    /// Inserts a value into the trie at the given key.
+    /// Inserts a value into the trie at the given key. If the key already
+    /// exists in the trie, the value is replaced and the old value is returned,
+    /// otherwise `None` is returned.
     /// ```
     /// use trie_map::TrieMap;
     ///
@@ -378,7 +390,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// assert_eq!(trie.get("hello"), Some(&1));
     /// ```
-    pub fn insert<K>(&mut self, key: K, value: V)
+    pub fn insert<K>(&mut self, key: K, value: V) -> Option<V>
     where
         K: AsRef<[u8]>,
     {
@@ -387,27 +399,34 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
 
     /// Inserts a value into the trie at the given key. The trait bound on `K`
     /// makes it easy to pass an iterator or other type that can be converted
-    /// into an iterator as a paramter.
+    /// into an iterator as a paramter. If the key already exists in the trie,
+    /// the value is replaced and the old value is returned, otherwise `None` is
+    /// returned.
     ///
-    pub fn insert_by_iter<'a, K>(&mut self, key: K, value: V)
+    pub fn insert_by_iter<'a, K>(&mut self, key: K, value: V) -> Option<V>
     where
         K: IntoIterator<Item=&'a u8>,
     {
-        let mut hcurr = self.root;
+        let mut hcurr  = self.root;
+        let mut retval = None;
         for b in key {
-            let idx = (b - BASE_CHAR) as usize;
-            if let Some(hnext) = self.hderef(hcurr).child[idx] {
+            let ichild = (b - BASE_CHAR) as usize;
+            if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
             } else {
                 let hnew = self.new_node();
                 let curr = self.hderef_mut(hcurr);
-                curr.child[idx] = Some(hnew);
+                curr.child[ichild] = Some(hnew);
                 curr.len += 1;
                 hcurr = hnew;
             }
         }
+        if let Some(hvalue) = self.hderef_mut(hcurr).value {
+            retval = self.values[hvalue.0].take();
+        }
         let hvalue = self.new_value(value);
         self.hderef_mut(hcurr).value = Some(hvalue);
+        retval
     }
 
     /// Returns an iterator over the key-value pairs in the trie.
@@ -525,10 +544,10 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         let mut hcurr = self.root;
         let mut stack = Vec::new();
         for b in key {
-            let idx = (b - BASE_CHAR) as usize;
-            if let Some(next) = self.hderef(hcurr).child[idx] {
-                stack.push((hcurr, idx));
-                hcurr = next;
+            let ichild = (b - BASE_CHAR) as usize;
+            if let Some(hnext) = self.hderef(hcurr).child[ichild] {
+                stack.push((hcurr, ichild));
+                hcurr = hnext;
             } else {
                 return None;
             }
@@ -540,9 +559,9 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
             let value = self.values[hvalue.0].take().unwrap();
             if self.hderef(hcurr).len == 0 {
                 self.del_node(hcurr);
-                while let Some((hnode, idx)) = stack.pop() {
+                while let Some((hnode, ichild)) = stack.pop() {
                     let node = self.hderef_mut(hnode);
-                    node.child[idx] = None;
+                    node.child[ichild] = None;
                     node.len -= 1;
                     if node.len == 0 && node.value.is_none() {
                         self.del_node(hnode);
