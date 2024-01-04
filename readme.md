@@ -11,7 +11,7 @@ indexed by value handles.
 
 The size of the node arrays can be configured through the generic parameters,
 `RANGE` and `BASE_CHAR`. For instance, the code below sets up a trie that
-can hold all 26 of the lowercase ASCII characters.
+supports keys composed of the 26 lowercase ASCII characters.
 
 ``` rust
 use trie_map::TrieMap;
@@ -24,6 +24,13 @@ trie.insert("hello", 1);
 assert_eq!(trie.contains("hello"), true);
 ```
 
-Each node of the trie will have a fixed-size descendant array of 26 length,
-which are indexed into directly by the next character's byte value minus 
-`BASE_CHAR`.
+Each node of the trie, as configured above, will have a fixed-size descendant 
+array of 26 length, which are indexed into directly by the next character's byte
+value minus `BASE_CHAR`.
+
+The methods of the trie support key types of `String`, `&str`, `&[u8]`, and 
+other types that implement either `AsRef<[u8]>` or `IntoIterator<Item=&u8>`.
+Internally, the key's bytes are iterated over to populate the trie. These 
+bytes can be UTF-8/ASCII compatible characters, or they could represent
+anything suitable to a project's requirements so long as `RANGE` and
+`BASE_CHAR` are correctly specified.
