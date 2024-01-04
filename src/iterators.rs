@@ -43,17 +43,18 @@ trait InnerIter<V, const R: usize, const B: u8> {
             self.stack().push((ROOT_HANDLE, 0, true))
         }
         while let Some((hcurr, mut i, b)) = self.stack().pop() {
-            if self.hderef(hcurr).value.is_some() && b {
-                self.stack().push((hcurr, 0, false));
-                let hval  = self.hderef(hcurr).value.unwrap();
+            let curr = self.hderef(hcurr);
+            if curr.value.is_some() && b {
+                let hval  = curr.value.unwrap();
                 let key   = self.key().clone().into_boxed_slice();
+                self.stack().push((hcurr, 0, false));
                 return self.iter_item(hcurr, hval, key)
             }
-            while i < R && self.hderef(hcurr).child[i].is_none() {
+            while i < R && curr.child[i].is_none() {
                 i += 1;
             }
             if i < R {
-                let child = self.hderef(hcurr).child[i].unwrap();
+                let child = curr.child[i].unwrap();
                 self.key().push(i as u8 + B);
                 self.stack().push((hcurr, i + 1, false));
                 self.stack().push((child, 0, true));
@@ -74,16 +75,17 @@ trait InnerIter<V, const R: usize, const B: u8> {
             self.stack().push((ROOT_HANDLE, R, true));
         }
         while let Some((hcurr, mut i, b)) = self.stack().pop() {
-            while i > 0 && self.hderef(hcurr).child[i - 1].is_none() {
+            let curr = self.hderef(hcurr);
+            while i > 0 && curr.child[i - 1].is_none() {
                 i -= 1;
             }
             if i > 0 {
-                let child = self.hderef(hcurr).child[i - 1].unwrap();
+                let child = curr.child[i - 1].unwrap();
                 self.key().push(i as u8 + B - 1);
                 self.stack().push((hcurr, i - 1, true));
                 self.stack().push((child, R, true));
-            } else if self.hderef(hcurr).value.is_some() && b {
-                let hval  = self.hderef(hcurr).value.unwrap();
+            } else if curr.value.is_some() && b {
+                let hval  = curr.value.unwrap();
                 let key   = self.key().clone().into_boxed_slice();
                 self.key().pop();
                 return self.iter_item(hcurr, hval, key)
