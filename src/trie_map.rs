@@ -742,23 +742,14 @@ mod tests {
 
         trie.insert(b"hello", 1);
         trie.insert(b"world", 2);
-
         assert_eq!(trie.len(), 2);
-
         trie.insert(b"walter", 3);
-
         assert_eq!(trie.len(), 3);
-
         trie.remove(b"hello");
-
         assert_eq!(trie.len(), 2);
-
         trie.remove(b"world");
-
         assert_eq!(trie.len(), 1);
-
         trie.remove(b"walter");
-
         assert_eq!(trie.len(), 0);
     }
 
