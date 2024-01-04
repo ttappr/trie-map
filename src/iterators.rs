@@ -26,7 +26,7 @@ trait InnerIter<V, const R: usize, const B: u8> {
     /// Invokes the iterator's trie's hderef method.
     /// 
     fn hderef(&self, handle: NodeHandle) -> &Node<R>;
-    
+
     /// Invoked on the iterator to get it to produce the next iterator item.
     /// 
     fn iter_item(&mut self, 
@@ -39,10 +39,8 @@ trait InnerIter<V, const R: usize, const B: u8> {
     /// next() method which onlly calls this method.
     /// 
     fn inner_next(&mut self) -> Option<Self::Item> {
-        if let Some(next) = self.stack().last_mut() {
-            if next.1 == usize::MAX {
-                next.1 = 0;
-            }
+        if self.stack().is_empty() {
+            self.stack().push((ROOT_HANDLE, 0, true))
         }
         while let Some((hcurr, mut i, b)) = self.stack().pop() {
             if self.hderef(hcurr).value.is_some() && b {
@@ -66,16 +64,14 @@ trait InnerIter<V, const R: usize, const B: u8> {
         None
     }
 
-    /// The core of the traversal algorithm. This method is invoked by the
-    /// iterator's next_back method. Each iterator implements 
+    /// The core of the reverse traversal algorithm. This method is invoked by 
+    /// the iterator's next_back method. Each iterator implements 
     /// DoubleEndedIterator and its next_back() method which onlly calls this 
     /// method.
     /// 
     fn inner_next_back(&mut self) -> Option<Self::Item> {
-        if let Some(next) = self.stack().last_mut() {
-            if next.1 == usize::MAX {
-                next.1 = R;
-            }
+        if self.stack().is_empty() {
+            self.stack().push((ROOT_HANDLE, R, true));
         }
         while let Some((hcurr, mut i, b)) = self.stack().pop() {
             while i > 0 && self.hderef(hcurr).child[i - 1].is_none() {
@@ -108,9 +104,7 @@ pub struct IntoIter<V, const R: usize, const B: u8> {
 }
 impl<V, const R: usize, const B: u8> IntoIter<V, R, B> {
     pub(crate) fn new(trie: TrieMap<V, R, B>) -> Self {
-        let curr  = trie.root;
-        let stack = vec![(curr, usize::MAX, true)];
-        Self { trie, key: Vec::new(), stack }
+        Self { trie, key: Vec::new(), stack: Vec::new() }
     }
 }
 
@@ -172,9 +166,7 @@ pub struct Iter<'a, V, const R: usize, const B: u8> {
 }
 impl<'a, V, const R: usize, const B: u8> Iter<'a, V, R, B> {
     pub(crate) fn new(trie: &'a TrieMap<V, R, B>) -> Self {
-        let curr  = trie.root;
-        let stack = vec![(curr, usize::MAX, true)];
-        Self { trie, key: Vec::new(), stack }
+        Self { trie, key: Vec::new(), stack: Vec::new() }
     }
 }
 
@@ -241,9 +233,7 @@ pub struct IterMut<'a, V, const R: usize, const B: u8> {
 
 impl<'a, V, const R: usize, const B: u8> IterMut<'a, V, R, B> {
     pub(crate) fn new(trie: &'a mut TrieMap<V, R, B>) -> Self {
-        let curr  = trie.root;
-        let stack = vec![(curr, usize::MAX, true)];
-        Self { trie, key: Vec::new(), stack }
+        Self { trie, key: Vec::new(), stack: Vec::new() }
     }
 }
 
@@ -325,17 +315,24 @@ impl<'a, V, const R: usize, const B: u8> Iterator for Keys<'a, V, R, B> {
     }
 }
 
+impl<'a, V, const R: usize, const B: u8> 
+    DoubleEndedIterator for Keys<'a, V, R, B> 
+{
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|(key, _)| key)
+    }
+}
+
 /// An iterator over the values of a `TrieMap` that holds an immutable reference
 /// to the trie.
 /// 
 pub struct Values<'a, V, const R: usize, const B: u8> {
-    trie  : &'a TrieMap<V, R, B>,
-    idx   : usize,
-    count : usize,
+    iter: Iter<'a, V, R, B>,
 }
+
 impl<'a, V, const R: usize, const B: u8> Values<'a, V, R, B> {
     pub(crate) fn new(trie: &'a TrieMap<V, R, B>) -> Self {
-        Self { trie, idx: 0, count: trie.len() }
+        Self { iter: Iter::new(trie) }
     }
 }
 
@@ -343,20 +340,15 @@ impl<'a, V, const R: usize, const B: u8> Iterator for Values<'a, V, R, B> {
     type Item = &'a V;
 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.count == 0 {
-            return None;
-        }
-        while self.idx < self.trie.values.len()
-            && self.trie.values[self.idx].is_none() {
-            self.idx += 1;
-        }
-        if self.idx < self.trie.values.len() {
-            self.count -= 1;
-            self.idx += 1;
-            self.trie.values[self.idx - 1].as_ref()
-        } else {
-            None
-        }
+        self.iter.next().map(|(_, val)| val)
+    }
+}
+
+impl<'a, V, const R: usize, const B: u8> 
+    DoubleEndedIterator for Values<'a, V, R, B> 
+{
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|(_, val)| val)
     }
 }
 
