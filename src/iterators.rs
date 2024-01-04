@@ -6,11 +6,11 @@
 
 use crate::trie_map::*;
 
-/// The common trait for all iterators that implements the traversal algorithm.
-/// Each iterator implements the basic accessor methods, which simplfies their
-/// implementation by eliminating duplicated code. The `inner_next` and
-/// `inner_next_back` methods are the core of the traversal algorithm and 
-/// mirror Iterator::next and Iterator::next_back.
+/// The common trait all iterators share. It provides the traversal algorithms
+/// while the iterators themselves implement its accessor methods and provide
+/// a stack and key vector. The Iterator and DoubleEndedIterator traits are
+/// implemented by the iterators themselves, which only call the traversal
+/// algorithms of this trait.
 /// 
 trait InnerIter<V, const R: usize, const B: u8> {
     type Item;
@@ -29,10 +29,10 @@ trait InnerIter<V, const R: usize, const B: u8> {
 
     /// Invoked on the iterator to get it to produce the next iterator item.
     /// 
-    fn iter_item(&mut self, 
-                 hcurr : NodeHandle,
-                 hval  : ValueHandle,
-                 key   : Box<[u8]>  ) -> Option<Self::Item>;
+    fn item(&mut self, 
+            hcurr : NodeHandle,
+            hval  : ValueHandle,
+            key   : Box<[u8]>  ) -> Option<Self::Item>;
 
     /// The core of the traversal algorithm. This method is invoked by the
     /// iterator's next method. Each iterator implements Iterator and its 
@@ -42,22 +42,22 @@ trait InnerIter<V, const R: usize, const B: u8> {
         if self.stack().is_empty() {
             self.stack().push((ROOT_HANDLE, 0, true))
         }
-        while let Some((hcurr, mut i, b)) = self.stack().pop() {
+        while let Some((hcurr, mut ichild, b)) = self.stack().pop() {
             let curr = self.hderef(hcurr);
             if curr.value.is_some() && b {
                 let hval  = curr.value.unwrap();
                 let key   = self.key().clone().into_boxed_slice();
                 self.stack().push((hcurr, 0, false));
-                return self.iter_item(hcurr, hval, key)
+                return self.item(hcurr, hval, key)
             }
-            while i < R && curr.child[i].is_none() {
-                i += 1;
+            while ichild < R && curr.child[ichild].is_none() {
+                ichild += 1;
             }
-            if i < R {
-                let child = curr.child[i].unwrap();
-                self.key().push(i as u8 + B);
-                self.stack().push((hcurr, i + 1, false));
-                self.stack().push((child, 0, true));
+            if ichild < R {
+                let hchild = curr.child[ichild].unwrap();
+                self.key().push(ichild as u8 + B);
+                self.stack().push((hcurr, ichild + 1, false));
+                self.stack().push((hchild, 0, true));
             } else {
                 self.key().pop();
             }
@@ -74,21 +74,21 @@ trait InnerIter<V, const R: usize, const B: u8> {
         if self.stack().is_empty() {
             self.stack().push((ROOT_HANDLE, R, true));
         }
-        while let Some((hcurr, mut i, b)) = self.stack().pop() {
+        while let Some((hcurr, mut ichild, b)) = self.stack().pop() {
             let curr = self.hderef(hcurr);
-            while i > 0 && curr.child[i - 1].is_none() {
-                i -= 1;
+            while ichild > 0 && curr.child[ichild - 1].is_none() {
+                ichild -= 1;
             }
-            if i > 0 {
-                let child = curr.child[i - 1].unwrap();
-                self.key().push(i as u8 + B - 1);
-                self.stack().push((hcurr, i - 1, true));
-                self.stack().push((child, R, true));
+            if ichild > 0 {
+                let hchild = curr.child[ichild - 1].unwrap();
+                self.key().push(ichild as u8 + B - 1);
+                self.stack().push((hcurr, ichild - 1, true));
+                self.stack().push((hchild, R, true));
             } else if curr.value.is_some() && b {
                 let hval  = curr.value.unwrap();
                 let key   = self.key().clone().into_boxed_slice();
                 self.key().pop();
-                return self.iter_item(hcurr, hval, key)
+                return self.item(hcurr, hval, key)
             } else {
                 self.key().pop();
             }
@@ -126,10 +126,10 @@ impl<V, const R: usize, const B: u8> InnerIter<V, R, B> for IntoIter<V, R, B> {
         self.trie.hderef(handle)
     }
     #[inline]
-    fn iter_item(&mut self, 
-                 hcurr : NodeHandle,
-                 hval  : ValueHandle,
-                 key   : Box<[u8]>  ) -> Option<Self::Item> {
+    fn item(&mut self, 
+            hcurr : NodeHandle,
+            hval  : ValueHandle,
+            key   : Box<[u8]>  ) -> Option<Self::Item> {
         self.trie.nodes[hcurr.0].value = None;
         Some((key, self.trie.values[hval.0].take().unwrap()))
     }
@@ -190,10 +190,10 @@ impl<'a, V, const R: usize, const B: u8>
         self.trie.hderef(handle)
     }
     #[inline]
-    fn iter_item(&mut self, 
-                 _hcurr : NodeHandle,
-                 hval   : ValueHandle,
-                 key    : Box<[u8]>  ) -> Option<Self::Item> {
+    fn item(&mut self, 
+            _hcurr : NodeHandle,
+            hval   : ValueHandle,
+            key    : Box<[u8]>  ) -> Option<Self::Item> {
         let value = self.trie.values[hval.0].as_ref().unwrap();
         Some((key, value))
     }
@@ -257,10 +257,10 @@ impl<'a, V, const R: usize, const B: u8>
         self.trie.hderef(handle)
     }
     #[inline]
-    fn iter_item<'b>(&'b mut self, 
-                     _hcurr : NodeHandle,
-                     hval   : ValueHandle,
-                     key    : Box<[u8]>  ) -> Option<Self::Item> {
+    fn item<'b>(&'b mut self, 
+                _hcurr : NodeHandle,
+                hval   : ValueHandle,
+                key    : Box<[u8]>  ) -> Option<Self::Item> {
         use std::mem::transmute;
         let value = self.trie.values[hval.0].as_mut().unwrap();
         let value = unsafe { transmute::<&mut V, &'a mut V>(value) };
@@ -354,8 +354,25 @@ impl<'a, V, const R: usize, const B: u8>
     }
 }
 
+impl<V, const R: usize, const B: u8, K> 
+    FromIterator<(K, V)> for TrieMap<V, R, B> 
+where
+    K: AsRef<[u8]>,
+{
+    fn from_iter<I: IntoIterator<Item=(K, V)>>(iter: I) -> Self {
+        let mut trie = Self::new();
+        for (key, value) in iter {
+            trie.insert(key, value);
+        }
+        trie
+    }
+}
+
+
 #[cfg(test)]
 mod tests {
+    use std::error::Error;
+
     use super::*;
 
     fn bx(slice: &[u8]) -> Box<[u8]> {
@@ -570,5 +587,53 @@ mod tests {
         for (key1, key2) in iter {
             assert_eq!(key1.as_ref(), key2);
         }
+    }
+
+    #[test]
+    fn sorting() {
+        let mut words = ["engineering", "physics", "elephant", "economics", 
+                         "psychology", "anthropology", "language", "biology", 
+                         "kinematics", "linguistics", "geography", "computer", 
+                         "oceanography", "programming", "architecture", 
+                         "astronomy", "history", "quantum", "sociology", 
+                         "journalism", "democracy", "chemistry", "zoology", 
+                         "mathematics", "javascript", "philosophy", 
+                         "literature", "python", "nutrition", "metaphysics"];
+
+        let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+
+        for (i, word) in words.iter().enumerate() {
+            trie.insert(word, i as i32);
+        }
+        words.sort();
+
+        let mut words = words.iter().map(|s| s.to_string()).collect::<Vec<_>>();
+        
+        let sort1 = trie.keys().map(|b| Ok(String::from_utf8(b.to_vec())?))
+                        .collect::<Result<Vec<_>, Box<dyn Error>>>()
+                        .unwrap();
+
+        assert_eq!(sort1, words);
+
+        let sort2 = trie.keys().rev()
+                        .map(|b| Ok(String::from_utf8(b.to_vec())?))
+                        .collect::<Result<Vec<_>, Box<dyn Error>>>()
+                        .unwrap();
+
+        words.sort_by(|a, b| b.cmp(a));
+
+        assert_eq!(sort2, words);
+    }
+
+    #[test]
+    fn from_iter() {
+        let trie: TrieMap<u32, 26, b'a'> = vec![
+            ("foo", 1),
+            ("bar", 2),
+            ("baz", 3),
+        ].into_iter().collect();
+        assert_eq!(trie.get("bar"), Some(&2));
+        assert_eq!(trie.get("baz"), Some(&3));
+        assert_eq!(trie.get("foo"), Some(&1));
     }
 }
