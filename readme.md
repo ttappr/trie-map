@@ -55,9 +55,11 @@ let picture = PicFile::load("./arctic_fox.png");
 trie.insert(&key_encoder::iter_encode("Αρκτική αλεπού"), picture);
 
 // Encoding and lookup stop immediately, since "Pallas's Cat" isn't in the trie.
-assert_eq!(trie.contains(&key_encoder::iter_encode("Pallas's Cat")), false);
+assert_eq!(trie.contains_by_iter(&key_encoder.iter_encode("Pallas's Cat")), 
+           false);
 
-assert_eq!(trie.contains(&key_encoder::iter_encode("Αρκτική αλεπού")), true);
+assert_eq!(trie.contains_by_iter(&key_encoder.iter_encode("Αρκτική αλεπού")), 
+           true);
 ```
 
 The above is somewhat hypothetical, but it could be a workable strategy to
