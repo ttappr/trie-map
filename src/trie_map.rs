@@ -1,8 +1,8 @@
 //! # TrieMap, A Trie-based Map for Rust
 //!
-//! This implementation is designed for speed of lookups, insertions, etc. This
+//! This implementation is designed for speed of lookups and insertions. This
 //! is achieved by minimizing the number of operations required to access
-//! values and optimizing data locality by holding nodes in contiguous memory.
+//! values and leveraging data locality by holding nodes in contiguous memory.
 //!
 //! Also nodes have fixed size arrays of their descendants, so accessing them
 //! isn't likely to result in a cache miss, as could happen if they were stored
