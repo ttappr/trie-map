@@ -20,6 +20,8 @@
 
 use crate::iterators::{Iter, IterMut, Keys, Values};
 
+pub(crate) const ROOT_HANDLE: NodeHandle = NodeHandle(0);
+
 /// A handle used interally to reference values stored in the trie.
 ///
 #[repr(transparent)]
@@ -72,7 +74,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     pub fn new() -> Self {
         Self {
-            root      : NodeHandle(0),
+            root      : ROOT_HANDLE,
             nodes     : vec![Node::new()],
             values    : vec![],
             node_bin  : vec![],
@@ -86,7 +88,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     pub fn with_capacity(capacity: usize) -> Self {
         Self {
-            root      : NodeHandle(0),
+            root      : ROOT_HANDLE,
             nodes     : vec![Node::new()],
             values    : Vec::with_capacity(capacity),
             node_bin  : vec![],
