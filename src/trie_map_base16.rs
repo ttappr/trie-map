@@ -42,9 +42,13 @@ impl<V> TrieMapBase16<V> {
     /// 
     /// trie.insert("Γειά σου", 1);
     /// trie.insert("κόσμος", 2);
+    /// trie.insert("👋", 42);
+    /// trie.insert("🌍", 43);
     /// 
     /// assert_eq!(trie.get("Γειά σου"), Some(&1));
     /// assert_eq!(trie.get("κόσμος"), Some(&2));
+    /// assert_eq!(trie.get("👋"), Some(&42));
+    /// assert_eq!(trie.get("🌍"), Some(&43));
     /// 
     /// ````
     pub fn get(&self, key: &str) -> Option<&V> {
