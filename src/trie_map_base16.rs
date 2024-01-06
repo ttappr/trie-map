@@ -1,28 +1,17 @@
-#![allow(dead_code)]
-
 use std::borrow::Borrow;
 
 use crate::TrieMap;
 
-/// A trie whose keys are primarily sequences of lowercase ASCII letters, but
-/// can also contain any other character using a special escape sequence.
-///
-/// This strategy is transparent to the user. The user could pass in strings
-/// containing all Greek characters if they wanted, it just takes more syntax
-/// nodes to store them. So if keys are primarily lowercase ASCII, this trie
-/// should be very efficient while providing some additional key flexibility.
-///
-/// Any character in a string that isn't lowercase ASCII is escaped with a
-/// 'q' followed by the character's encoded value using two lowercase ASCII
-/// characters to represent any byte value from 0 to 255. The key encoder will
-/// remain in the escaped state until it encounters a lowercase ASCII letter,
-/// at which point it will terminate the encoded region of the key with a single
-/// 'q'.
+/// A trie whose keys can be any string with no restrictions on characters.
+/// This is achieved by base 16 encoding the key as it's inserted into the trie.
+/// The encoding is done via an iterator that only encodes the number of bytes
+/// needed to determine if a key is missing or present. So determining a miss
+/// is as fast as possible for operations such as `contains()`.
 /// 
-/// The encoder is implemented as an iterator, so only the necessary number of
-/// key characters are processed in cases where a `get` operation is being
-/// performed and the key isn't in the trie. It will give up early, minimizing
-/// the operations performed during a lookup miss.
+/// Each node has a fixed-size array 16 successors. And a value of any type
+/// can be inserted with a key. The values are stored in independent contiguous
+/// memory, while the terminal trie nodes hold handles to their values.
+///
 /// 
 pub struct TrieMapBase26<V> {
     trie: TrieMap<V, 16, b'a'>,
