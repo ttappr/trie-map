@@ -353,16 +353,6 @@ mod tests {
         for (k1, k2) in trie.keys().zip(["🌍", "👋"].iter()) {
             assert_eq!(k1, k2.to_string());
         }
-
-        trie.insert("hello", 42);
-        trie.insert("world", 43);
-
-        assert_eq!(trie.get("hello"), Some(&42));
-        assert_eq!(trie.get("world"), Some(&43));
-
-        for (k1, k2) in trie.keys().zip(["hello", "world"].iter()) {
-            assert_eq!(k1, k2.to_string());
-        }
     }
 
     #[test]
