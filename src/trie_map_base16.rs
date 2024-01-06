@@ -1,3 +1,7 @@
+//! A trie whose keys can be any string with no restrictions on characters.
+//! This is achieved by base 16 encoding the key as it's inserted into the trie.
+//! 
+
 use std::borrow::Borrow;
 
 use crate::TrieMap;
@@ -196,7 +200,9 @@ fn decode(bytes: &[u8]) -> String {
             str.push(buf);
         }
     }
-    String::from_utf8(str).unwrap()
+    unsafe {
+        String::from_utf8_unchecked(str)
+    }
 }
 
 pub struct IntoIter<V> {
@@ -333,7 +339,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_insert() {
+    fn insert() {
         let mut trie = TrieMapBase16::new();
         assert_eq!(trie.insert("hello", 1), None);
         assert_eq!(trie.insert("hello", 2), Some(1));
@@ -351,7 +357,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get() {
+    fn get() {
         let mut trie = TrieMapBase16::new();
         assert_eq!(trie.get("hello"), None);
         assert_eq!(trie.insert("hello", 1), None);
@@ -377,7 +383,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_mut() {
+    fn get_mut() {
         let mut trie = TrieMapBase16::new();
         assert_eq!(trie.get_mut("hello"), None);
         assert_eq!(trie.insert("hello", 1), None);
@@ -389,7 +395,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_or_insert() {
+    fn get_or_insert() {
         let mut trie = TrieMapBase16::new();
         assert_eq!(trie.get_or_insert("hello", 1), &mut 1);
         assert_eq!(trie.get_or_insert("hello", 2), &mut 1);
@@ -410,7 +416,7 @@ mod tests {
     }
 
     #[test]
-    fn test_contains() {
+    fn contains() {
         let mut trie = TrieMapBase16::new();
         assert_eq!(trie.contains("hello"), false);
         assert_eq!(trie.insert("hello", 1), None);
@@ -422,7 +428,7 @@ mod tests {
     }
 
     #[test]
-    fn test_remove() {
+    fn remove() {
         let mut trie = TrieMapBase16::new();
         assert_eq!(trie.remove("hello"), None);
         assert_eq!(trie.insert("hello", 1), None);
@@ -431,7 +437,7 @@ mod tests {
     }
 
     #[test]
-    fn test_iter() {
+    fn iter() {
         let mut trie = TrieMapBase16::new();
         trie.insert("hello", 1);
         trie.insert("world", 2);
@@ -447,7 +453,7 @@ mod tests {
     }
 
     #[test]
-    fn test_iter_mut() {
+    fn iter_mut() {
         let mut trie = TrieMapBase16::new();
         trie.insert("hello", 1);
         trie.insert("world", 2);
@@ -480,7 +486,7 @@ mod tests {
     }
 
     #[test]
-    fn test_keys() {
+    fn keys() {
         let mut trie = TrieMapBase16::new();
         trie.insert("hello", 1);
         trie.insert("world", 2);
@@ -503,7 +509,7 @@ mod tests {
     }
 
     #[test]
-    fn test_values() {
+    fn values() {
         let mut trie = TrieMapBase16::new();
         trie.insert("hello", 1);
         trie.insert("world", 2);
