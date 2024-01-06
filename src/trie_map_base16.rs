@@ -1,5 +1,7 @@
 #![allow(dead_code)]
 
+use std::borrow::Borrow;
+
 use crate::TrieMap;
 
 /// A trie whose keys are primarily sequences of lowercase ASCII letters, but
@@ -23,7 +25,7 @@ use crate::TrieMap;
 /// the operations performed during a lookup miss.
 /// 
 pub struct TrieMapBase26<V> {
-    trie: TrieMap<V, 16, 0>,
+    trie: TrieMap<V, 16, b'a'>,
 }
 
 impl<V> TrieMapBase26<V> {
@@ -31,16 +33,20 @@ impl<V> TrieMapBase26<V> {
         Self { trie: TrieMap::new() }
     }
 
-    pub fn contains<K: AsRef<[u8]>>(&self, key: K) -> bool {
-        self.trie.get(key).is_some()
+    pub fn contains(&self, key: &str) -> bool {
+        self.trie.get_by_iter(Encoder::new(key.bytes())).is_some()
     }
 
-    pub fn get<K: AsRef<[u8]>>(&self, key: K) -> Option<&V> {
-        self.trie.get(key)
+    pub fn get(&self, key: &str) -> Option<&V> {
+        self.trie.get_by_iter(Encoder::new(key.bytes()))
     }
 
-    pub fn insert<K: AsRef<[u8]>>(&mut self, key: K, value: V) -> Option<V> {
-        self.trie.insert(key, value)
+    pub fn get_mut(&mut self, key: &str) -> Option<&mut V> {
+        self.trie.get_mut_by_iter(Encoder::new(key.bytes()))
+    }
+
+    pub fn insert<K: Borrow<str>>(&mut self, key: K, value: V) -> Option<V> {
+        self.trie.insert_by_iter(Encoder::new(key.borrow().bytes()), value)
     }
 
     pub fn len(&self) -> usize {
@@ -51,8 +57,8 @@ impl<V> TrieMapBase26<V> {
         self.trie.is_empty()
     }
 
-    pub fn remove<K: AsRef<[u8]>>(&mut self, key: K) -> Option<V> {
-        self.trie.remove(key)
+    pub fn remove(&mut self, key: &str) -> Option<V> {
+        self.trie.remove_by_iter(Encoder::new(key.bytes()))
     }
 
     pub fn clear(&mut self) {
@@ -60,23 +66,23 @@ impl<V> TrieMapBase26<V> {
     }
 }
 
-struct Encoder<'a> {
-    key: Option<Box<dyn Iterator<Item=&'a u8>>>,
+struct Encoder<K> {
+    key: K,
     buf: u8,
 }
-impl<'a> Encoder<'a> {
-    fn new() -> Self {
-        Self { key: None, buf: 0 }
-    }
-    fn encode<K>(&mut self, key: K) 
-    where 
-        K: IntoIterator<Item=&'a u8> + 'static,
-    {
-        self.key = Some(Box::new(key.into_iter()));
+impl<K> Encoder<K> 
+where
+    K: Iterator<Item=u8>,
+{
+    fn new(iter: K) -> Self {
+        Self { key: iter, buf: 0 }
     }
 }
 
-impl<'a> Iterator for Encoder<'a> {
+impl<K> Iterator for Encoder<K> 
+where
+    K: Iterator<Item=u8>,
+{
     type Item = u8;
 
     fn next(&mut self) -> Option<Self::Item> {
@@ -84,7 +90,7 @@ impl<'a> Iterator for Encoder<'a> {
             let b = self.buf;
             self.buf = 0;
             Some(b)
-        } else if let Some(&b) = self.key.as_mut().and_then(|k| k.next()) {
+        } else if let Some(b) = self.key.next() {
             self.buf = b & 0x0f;
             let b = b >> 4;
             Some(b)

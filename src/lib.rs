@@ -5,3 +5,5 @@ pub mod iterators;
 pub use trie_map::TrieMap;
 pub use trie_set::TrieSet;
 
+
+mod trie_map_base16;
