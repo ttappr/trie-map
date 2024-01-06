@@ -12,7 +12,7 @@ use crate::TrieMap;
 /// needed to determine if a key is missing or present. So determining a miss
 /// is as fast as possible for operations such as `contains()`.
 /// 
-/// Each node has a fixed-size array 16 successors. And a value of any type
+/// Each node has a fixed-size array for 16 successors. And a value of any type
 /// can be inserted with a key. The values are stored in independent contiguous
 /// memory, while the terminal trie nodes hold handles to their values.
 /// 
