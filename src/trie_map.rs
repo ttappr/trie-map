@@ -207,6 +207,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         let mut key   = key;
         let mut hcurr = self.root;
         while let Some(b) = key.next() {
+            debug_assert!(b >= BASE_CHAR && b < BASE_CHAR + RANGE as u8);
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
@@ -265,6 +266,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         let mut key   = key;
         let mut hcurr = self.root;
         while let Some(b) = key.next() {
+            debug_assert!(b >= BASE_CHAR && b < BASE_CHAR + RANGE as u8);
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
@@ -364,6 +366,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         let mut key   = key;
         let mut hcurr = self.root;
         while let Some(b) = key.next() {
+            debug_assert!(b >= BASE_CHAR && b < BASE_CHAR + RANGE as u8);
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
@@ -420,6 +423,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         let mut hcurr  = self.root;
         let mut retval = None;
         while let Some(b) = key.next() {
+            debug_assert!(b >= BASE_CHAR && b < BASE_CHAR + RANGE as u8);
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
@@ -555,6 +559,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         let mut hcurr = self.root;
         let mut stack = Vec::new();
         while let Some(b) = key.next() {
+            debug_assert!(b >= BASE_CHAR && b < BASE_CHAR + RANGE as u8);
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 stack.push((hcurr, ichild));
