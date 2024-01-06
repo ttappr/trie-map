@@ -18,7 +18,7 @@ use crate::trie_map::*;
 /// implemented by the iterators themselves, which only call the traversal
 /// algorithms of this trait.
 /// 
-trait InnerIter<V, const R: usize, const B: u8> {
+trait BaseIter<V, const R: usize, const B: u8> {
     type Item;
 
     /// Returns a stack used to track where in the trie the iterator is.
@@ -44,7 +44,7 @@ trait InnerIter<V, const R: usize, const B: u8> {
     /// iterator's next method. Each iterator implements Iterator and its 
     /// next() method which onlly calls this method.
     /// 
-    fn inner_next(&mut self) -> Option<Self::Item> {
+    fn base_next(&mut self) -> Option<Self::Item> {
         if self.stack().is_empty() {
             self.stack().push((ROOT_HANDLE, 0, true))
         }
@@ -76,7 +76,7 @@ trait InnerIter<V, const R: usize, const B: u8> {
     /// DoubleEndedIterator and its next_back() method which onlly calls this 
     /// method.
     /// 
-    fn inner_next_back(&mut self) -> Option<Self::Item> {
+    fn base_next_back(&mut self) -> Option<Self::Item> {
         if self.stack().is_empty() {
             self.stack().push((ROOT_HANDLE, R + 1, false));
         }
@@ -117,7 +117,7 @@ impl<V, const R: usize, const B: u8> IntoIter<V, R, B> {
     }
 }
 
-impl<V, const R: usize, const B: u8> InnerIter<V, R, B> for IntoIter<V, R, B> {
+impl<V, const R: usize, const B: u8> BaseIter<V, R, B> for IntoIter<V, R, B> {
     type Item = (Box<[u8]>, V);
 
     #[inline]
@@ -146,13 +146,13 @@ impl<V, const R: usize, const B: u8> Iterator for IntoIter<V, R, B> {
     type Item = (Box<[u8]>, V);
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner_next()
+        self.base_next()
     }
 }
 
 impl<V, const R: usize, const B: u8> DoubleEndedIterator for IntoIter<V, R, B> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.inner_next_back()
+        self.base_next_back()
     }
 }
 
@@ -180,7 +180,7 @@ impl<'a, V, const R: usize, const B: u8> Iter<'a, V, R, B> {
 }
 
 impl<'a, V, const R: usize, const B: u8> 
-    InnerIter<V, R, B> for Iter<'a, V, R, B> 
+    BaseIter<V, R, B> for Iter<'a, V, R, B> 
 {
     type Item = (Box<[u8]>, &'a V);
 
@@ -210,7 +210,7 @@ impl<'a, V, const R: usize, const B: u8> Iterator for Iter<'a, V, R, B> {
     type Item = (Box<[u8]>, &'a V);
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner_next()
+        self.base_next()
     }
 }
 
@@ -218,7 +218,7 @@ impl<'a, V, const R: usize, const B: u8>
     DoubleEndedIterator for Iter<'a, V, R, B>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.inner_next_back()
+        self.base_next_back()
     }
 }
 
@@ -247,7 +247,7 @@ impl<'a, V, const R: usize, const B: u8> IterMut<'a, V, R, B> {
 }
 
 impl<'a, V, const R: usize, const B: u8> 
-    InnerIter<V, R, B> for IterMut<'a, V, R, B> 
+    BaseIter<V, R, B> for IterMut<'a, V, R, B> 
 {
     type Item = (Box<[u8]>, &'a mut V);
 
@@ -280,7 +280,7 @@ impl<'a, V, const R: usize, const B: u8> Iterator for IterMut<'a, V, R, B> {
     type Item = (Box<[u8]>, &'a mut V);
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.inner_next()
+        self.base_next()
     }
 }
 
@@ -288,7 +288,7 @@ impl<'a, V, const R: usize, const B: u8>
     DoubleEndedIterator for IterMut<'a, V, R, B>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.inner_next_back()
+        self.base_next_back()
     }
 }
 
@@ -513,9 +513,12 @@ mod tests {
         assert_eq!(iter.next_back(), Some((bx(b"alpha"), &1)));
         assert_eq!(iter.next_back(), None);
 
-        assert_eq!(iter.next(), Some((bx(b"alpha"), &1)));
-        assert_eq!(iter.next(), Some((bx(b"beta"), &2)));
-        assert_eq!(iter.next(), Some((bx(b"delta"), &3)));
+        assert_eq!(iter.next_back(), Some((bx(b"gamma"), &5)));
+        assert_eq!(iter.next_back(), Some((bx(b"epsilon"), &4)));
+        assert_eq!(iter.next_back(), Some((bx(b"delta"), &3)));
+        assert_eq!(iter.next(), Some((bx(b"epsilon"), &4)));
+        assert_eq!(iter.next(), Some((bx(b"gamma"), &5)));
+        assert_eq!(iter.next(), None);
     }
 
     #[test]
