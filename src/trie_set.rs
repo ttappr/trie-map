@@ -113,6 +113,12 @@ impl<const R: usize, const B: u8> Iterator for IntoIter<R, B> {
     }
 }
 
+impl<const R: usize, const B: u8> DoubleEndedIterator for IntoIter<R, B> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|(k, _)| k)
+    }
+}
+
 impl<'a, const R: usize, const B: u8> IntoIterator for TrieSet<R, B> {
     type Item = Box<[u8]>;
     type IntoIter = IntoIter<R, B>;
@@ -131,6 +137,12 @@ impl<'a, const R: usize, const B: u8> Iterator for Iter<'a, R, B> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(|(k, _)| k)
+    }
+}
+
+impl<'a, const R: usize, const B: u8> DoubleEndedIterator for Iter<'a, R, B> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|(k, _)| k)
     }
 }
 
@@ -185,6 +197,15 @@ mod tests {
         assert!(set.insert("world"));
         assert_eq!(set.iter().collect::<Vec<_>>(), 
                    vec![bx("hello"), bx("world")]);
+    }
+
+    #[test]
+    fn iter_rev() {
+        let mut set = TrieSet::<26, b'a'>::new();
+        assert!(set.insert("hello"));
+        assert!(set.insert("world"));
+        assert_eq!(set.iter().rev().collect::<Vec<_>>(), 
+                   vec![bx("world"), bx("hello")]);
     }
 
     #[test]
