@@ -22,14 +22,30 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
     }
 
     /// Reports whether the set contains the given key.
+    /// ```
+    /// use trie_map::TrieSet;
     /// 
+    /// let mut set = TrieSet::<26, b'a'>::new();
+    /// 
+    /// assert!(set.insert("hello"));
+    /// assert!(set.contains("hello"));
+    /// assert!(!set.contains("world"));
+    /// ````
     pub fn contains<K: AsRef<[u8]>>(&self, key: K) -> bool {
         self.trie.get(key).is_some()
     }
 
     /// Reports whether the set contains the given key. The key is given as an
     /// iterator.
+    /// ```
+    /// use trie_map::TrieSet;
     /// 
+    /// let mut set = TrieSet::<26, b'a'>::new();
+    /// 
+    /// assert!(set.insert("hello"));
+    /// assert!(set.contains_by_iter("hello".bytes()));
+    /// assert!(!set.contains_by_iter("world".bytes()));
+    /// ```
     pub fn contains_by_iter<K>(&self, key: K) -> bool 
     where
         K: Iterator<Item = u8>
@@ -39,7 +55,15 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
 
     /// Inserts the given key into the set. Returns true if the key was not
     /// already present.
+    /// ```
+    /// use trie_map::TrieSet;
     /// 
+    /// let mut set = TrieSet::<26, b'a'>::new();
+    /// 
+    /// assert!(set.insert("hello"));
+    /// assert!(!set.insert("hello"));
+    /// assert!(set.insert("world"));
+    /// ````
     pub fn insert<K: AsRef<[u8]>>(&mut self, key: K) -> bool {
         self.trie.insert(key, ()).is_none()
     }
@@ -80,7 +104,15 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
 
     /// Removes the given key from the set. Returns true if the key was present.
     /// The key is given as an iterator.
+    /// ```
+    /// use trie_map::TrieSet;
     /// 
+    /// let mut set = TrieSet::<26, b'a'>::new();
+    /// 
+    /// assert!(set.insert("hello"));
+    /// assert!(set.remove_by_iter("hello".bytes()));
+    /// assert!(!set.remove_by_iter("hello".bytes()));
+    /// ```
     pub fn remove_by_iter<K>(&mut self, key: K) -> bool 
     where
         K: Iterator<Item = u8>
