@@ -28,7 +28,7 @@ pub struct TrieMapBase26<V> {
     trie: TrieMap<V, 16, b'a'>,
 }
 
-impl<V> TrieMapBase26<V> {
+impl<V> TrieMapBase26<V> { 
     pub fn new() -> Self {
         Self { trie: TrieMap::new() }
     }

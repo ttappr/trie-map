@@ -34,3 +34,4 @@ Internally, the key's bytes are iterated over to populate the trie. These
 bytes can be UTF-8/ASCII compatible characters, or they could represent
 anything suitable to a project's requirements so long as `RANGE` and
 `BASE_CHAR` are correctly specified.
+
