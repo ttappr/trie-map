@@ -45,8 +45,8 @@ trait InnerIter<V, const R: usize, const B: u8> {
         while let Some((hcurr, mut ichild, b)) = self.stack().pop() {
             let curr = self.hderef(hcurr);
             if curr.value.is_some() && b {
-                let hval  = curr.value.unwrap();
-                let key   = self.key().clone().into_boxed_slice();
+                let hval = curr.value.unwrap();
+                let key  = self.key().clone().into_boxed_slice();
                 self.stack().push((hcurr, 0, false));
                 return self.item(hcurr, hval, key)
             }
@@ -85,8 +85,8 @@ trait InnerIter<V, const R: usize, const B: u8> {
                 self.stack().push((hcurr, ichild - 1, true));
                 self.stack().push((hchild, R, true));
             } else if curr.value.is_some() && b {
-                let hval  = curr.value.unwrap();
-                let key   = self.key().clone().into_boxed_slice();
+                let hval = curr.value.unwrap();
+                let key  = self.key().clone().into_boxed_slice();
                 self.key().pop();
                 return self.item(hcurr, hval, key)
             } else {
