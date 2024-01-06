@@ -66,7 +66,20 @@ impl<V> TrieMapBase16<V> {
     /// If the key-value pair is not present in the map, inserts it and returns
     /// a mutable reference to the value. If the key-value pair is present,
     /// returns a mutable reference to the already present value.
+    /// ```
+    /// use trie_map::trie_map_base16::TrieMapBase16;
     /// 
+    /// let mut trie = TrieMapBase16::new();
+    /// 
+    /// trie.insert("Γειά σου", 1);
+    /// trie.insert("κόσμος", 2);
+    /// trie.insert("👋", 42);
+    /// 
+    /// assert_eq!(trie.get_or_insert("Γειά σου", 0), &mut 1);
+    /// assert_eq!(trie.get_or_insert("κόσμος", 0), &mut 2);
+    /// assert_eq!(trie.get_or_insert("👋", 0), &mut 42);
+    /// assert_eq!(trie.get_or_insert("🌍", 0), &mut 0);
+    /// ````
     pub fn get_or_insert<K>(&mut self, key: K, value: V) -> &mut V 
     where
         K: Borrow<str>,
@@ -115,7 +128,17 @@ impl<V> TrieMapBase16<V> {
     }
 
     /// Returns an iterator over the keys of the map in canonical order.
+    /// ```
+    /// use trie_map::trie_map_base16::TrieMapBase16;
     /// 
+    /// let mut trie = TrieMapBase16::new();
+    /// 
+    /// trie.insert("hello", 1);
+    /// trie.insert("world", 2);
+    /// 
+    /// let mut iter = trie.keys().rev();
+    /// assert_eq!(iter.next(), Some("world".to_string()));
+    /// ````
     pub fn keys(&self) -> Keys<V> {
         Keys::new(self.trie.keys())
     }
@@ -135,7 +158,17 @@ impl<V> TrieMapBase16<V> {
     /// Removes a key from the map, returning the value at the key if the key
     /// was previously in the map. If the key was not present in the map,
     /// `None` is returned.
+    /// ```
+    /// use trie_map::trie_map_base16::TrieMapBase16;
     /// 
+    /// let mut trie = TrieMapBase16::new();
+    /// 
+    /// trie.insert("hello", 1);
+    /// trie.insert("world", 2);
+    /// 
+    /// assert_eq!(trie.remove("hello"), Some(1));
+    /// assert_eq!(trie.remove("hello"), None);
+    /// ```
     pub fn remove(&mut self, key: &str) -> Option<V> {
         self.trie.remove_by_iter(Encoder::new(key.bytes()))
     }
@@ -207,9 +240,7 @@ fn decode(bytes: &[u8]) -> String {
             str.push(buf);
         }
     }
-    unsafe {
-        String::from_utf8_unchecked(str)
-    }
+    String::from_utf8(str).unwrap()
 }
 
 pub struct IntoIter<V> {
