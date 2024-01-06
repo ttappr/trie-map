@@ -17,22 +17,47 @@ pub struct TrieMapBase16<V> {
 }
 
 impl<V> TrieMapBase16<V> { 
+    /// Creates an empty `TrieMapBase16`.
+    /// 
     pub fn new() -> Self {
         Self { trie: TrieMap::new() }
     }
 
+    /// Returns `true` if the map contains a value for the specified key.
+    /// 
     pub fn contains(&self, key: &str) -> bool {
         self.trie.get_by_iter(Encoder::new(key.bytes())).is_some()
     }
 
+    /// Returns a reference to the value corresponding to the key, or `None` if
+    /// the key is not present in the map.
+    /// ```
+    /// use trie_map::trie_map_base16::TrieMapBase16;
+    /// 
+    /// let mut trie = TrieMapBase16::new();
+    /// 
+    /// trie.insert("Γειά σου", 1);
+    /// trie.insert("Κόσμε", 2);
+    /// 
+    /// assert_eq!(trie.get("Γειά σου"), Some(&1));
+    /// assert_eq!(trie.get("Κόσμε"), Some(&2));
+    /// 
+    /// ````
     pub fn get(&self, key: &str) -> Option<&V> {
         self.trie.get_by_iter(Encoder::new(key.bytes()))
     }
 
+    /// Returns a mutable reference to the value corresponding to the key, or
+    /// `None` if the key is not present in the map.
+    /// 
     pub fn get_mut(&mut self, key: &str) -> Option<&mut V> {
         self.trie.get_mut_by_iter(Encoder::new(key.bytes()))
     }
 
+    /// If the key-value pair is not present in the map, inserts it and returns
+    /// a mutable reference to the value. If the key-value pair is present,
+    /// returns a mutable reference to the already present value.
+    /// 
     pub fn get_or_insert<K>(&mut self, key: K, value: V) -> &mut V 
     where
         K: Borrow<str>,
@@ -41,6 +66,10 @@ impl<V> TrieMapBase16<V> {
         self.trie.get_or_insert_by_iter(iter, value)
     }
 
+    /// If the key-value pair is not present in the map, inserts it and returns
+    /// a mutable reference to the value. If the key-value pair is present,
+    /// returns a mutable reference to the already present value.
+    /// 
     pub fn get_or_insert_with<K, F>(&mut self, key: K, f: F) -> &mut V 
     where
         K: Borrow<str>,
@@ -50,6 +79,10 @@ impl<V> TrieMapBase16<V> {
         self.trie.get_or_insert_by_iter_with(iter, f)
     }
 
+    /// Inserts a key-value pair into the map. If the key already had a value
+    /// present in the map, that value is returned. Otherwise `None` is
+    /// returned.
+    /// 
     pub fn insert<K>(&mut self, key: K, value: V) -> Option<V> 
     where
         K: Borrow<str>,
@@ -58,27 +91,62 @@ impl<V> TrieMapBase16<V> {
         self.trie.insert_by_iter(iter, value)
     }
 
+    /// Returns an iterator over the key-value pairs of the map in canonical
+    /// order.
+    /// 
     pub fn iter(&self) -> Iter<V> {
         self.into_iter()
     }
 
+    /// Returns an iterator over the key-value pairs of the map. The values
+    /// are mutable.
+    /// 
+    pub fn iter_mut(&mut self) -> IterMut<V> {
+        self.into_iter()
+    }
+
+    /// Returns an iterator over the keys of the map in canonical order.
+    /// 
+    pub fn keys(&self) -> Keys<V> {
+        Keys::new(self.trie.keys())
+    }
+
+    /// Returns the number of key-value pairs in the map.
+    /// 
     pub fn len(&self) -> usize {
         self.trie.len()
     }
 
+    /// Returns `true` if the map contains no key-value pairs.
+    /// 
     pub fn is_empty(&self) -> bool {
         self.trie.is_empty()
     }
 
+    /// Removes a key from the map, returning the value at the key if the key
+    /// was previously in the map. If the key was not present in the map,
+    /// `None` is returned.
+    /// 
     pub fn remove(&mut self, key: &str) -> Option<V> {
         self.trie.remove_by_iter(Encoder::new(key.bytes()))
     }
 
+    /// Returns an iterator over the values of the map. They will be in the 
+    /// same order as the keys.
+    /// 
+    pub fn values(&self) -> Values<V> {
+        Values::new(self.trie.values())
+    }
+
+    /// Removes all key-value pairs from the map.
+    /// 
     pub fn clear(&mut self) {
         self.trie.clear();
     }
 }
 
+/// Internal iterator that encodes the key as it's iterated over.
+/// 
 struct Encoder<K> {
     key: K,
     buf: u8,
@@ -98,6 +166,8 @@ where
 {
     type Item = u8;
 
+    /// Progressively Base16 encodes the key as it advances during iteration.
+    /// 
     fn next(&mut self) -> Option<Self::Item> {
         if self.buf > 0 {
             let b = self.buf;
@@ -113,6 +183,8 @@ where
     }
 }
 
+/// Decodes a Base16 encoded string into a `String`.
+/// 
 fn decode(bytes: &[u8]) -> String {
     let mut str = Vec::new();
     let mut buf = 0;
@@ -139,6 +211,12 @@ impl<V> Iterator for IntoIter<V> {
     }
 }
 
+impl<V> DoubleEndedIterator for IntoIter<V> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|(k, v)| (decode(&k), v))
+    }
+}
+
 impl<V> IntoIterator for TrieMapBase16<V> {
     type Item = (String, V);
     type IntoIter = IntoIter<V>;
@@ -157,6 +235,12 @@ impl<'a, V> Iterator for Iter<'a, V> {
 
     fn next(&mut self) -> Option<Self::Item> {
         self.iter.next().map(|(k, v)| (decode(&k), v))
+    }
+}
+
+impl<'a, V> DoubleEndedIterator for Iter<'a, V> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|(k, v)| (decode(&k), v))
     }
 }
 
@@ -181,12 +265,66 @@ impl<'a, V> Iterator for IterMut<'a, V> {
     }
 }
 
+impl<'a, V> DoubleEndedIterator for IterMut<'a, V> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|(k, v)| (decode(&k), v))
+    }
+}
+
 impl<'a, V> IntoIterator for &'a mut TrieMapBase16<V> {
     type Item = (String, &'a mut V);
     type IntoIter = IterMut<'a, V>;
 
     fn into_iter(self) -> Self::IntoIter {
         IterMut { iter: (&mut self.trie).into_iter() }
+    }
+}
+
+pub struct Keys<'a, V> {
+    iter: crate::iterators::Keys<'a, V, 16, b'a'>,
+}
+
+impl<'a, V> Keys<'a, V> {
+    fn new(iter: crate::iterators::Keys<'a, V, 16, b'a'>) -> Self {
+        Self { iter  }
+    }
+}
+
+impl<'a, V> Iterator for Keys<'a, V> {
+    type Item = String;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|k| decode(&k))
+    }
+}
+
+impl<'a, V> DoubleEndedIterator for Keys<'a, V> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|k| decode(&k))
+    }
+}
+
+pub struct Values<'a, V> {
+    iter: crate::iterators::Values<'a, V, 16, b'a'>,
+}
+
+impl<'a, V> Values<'a, V> {
+    fn new(iter: crate::iterators::Values<'a, V, 16, b'a'>) -> Self {
+        Self { iter  }
+    }
+}
+
+impl<'a, V> Iterator for Values<'a, V> {
+    type Item = &'a V;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next()
+    }
+}
+
+impl<'a, V> DoubleEndedIterator for Values<'a, V> {
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back()
     }
 }
 
@@ -299,6 +437,85 @@ mod tests {
         assert_eq!(iter.next(), Some(("world".to_string(), 2)));
         assert_eq!(iter.next(), Some(("こんにちは".to_string(), 3)));
         assert_eq!(iter.next(), Some(("世界".to_string(), 4)));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn test_iter_mut() {
+        let mut trie = TrieMapBase16::new();
+        trie.insert("hello", 1);
+        trie.insert("world", 2);
+        trie.insert("こんにちは", 3);
+        trie.insert("世界", 4);
+
+        let mut iter = trie.iter_mut();
+        assert_eq!(iter.next(), Some(("hello".to_string(), &mut 1)));
+        assert_eq!(iter.next(), Some(("world".to_string(), &mut 2)));
+        assert_eq!(iter.next(), Some(("こんにちは".to_string(), &mut 3)));
+        assert_eq!(iter.next(), Some(("世界".to_string(), &mut 4)));
+        assert_eq!(iter.next(), None);
+
+        for (_, v) in &mut trie {
+            *v += 1;
+        }
+        let mut iter = trie.iter_mut();
+        assert_eq!(iter.next(), Some(("hello".to_string(), &mut 2)));
+        assert_eq!(iter.next(), Some(("world".to_string(), &mut 3)));
+        assert_eq!(iter.next(), Some(("こんにちは".to_string(), &mut 4)));
+        assert_eq!(iter.next(), Some(("世界".to_string(), &mut 5)));
+        assert_eq!(iter.next(), None);
+
+        let mut iter = trie.iter_mut().rev();
+        assert_eq!(iter.next(), Some(("世界".to_string(), &mut 5)));
+        assert_eq!(iter.next(), Some(("こんにちは".to_string(), &mut 4)));
+        assert_eq!(iter.next(), Some(("world".to_string(), &mut 3)));
+        assert_eq!(iter.next(), Some(("hello".to_string(), &mut 2)));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn test_keys() {
+        let mut trie = TrieMapBase16::new();
+        trie.insert("hello", 1);
+        trie.insert("world", 2);
+        trie.insert("こんにちは", 3);
+        trie.insert("世界", 4);
+
+        let mut iter = trie.keys();
+        assert_eq!(iter.next(), Some("hello".to_string()));
+        assert_eq!(iter.next(), Some("world".to_string()));
+        assert_eq!(iter.next(), Some("こんにちは".to_string()));
+        assert_eq!(iter.next(), Some("世界".to_string()));
+        assert_eq!(iter.next(), None);
+
+        let mut iter = trie.keys().rev();
+        assert_eq!(iter.next(), Some("世界".to_string()));
+        assert_eq!(iter.next(), Some("こんにちは".to_string()));
+        assert_eq!(iter.next(), Some("world".to_string()));
+        assert_eq!(iter.next(), Some("hello".to_string()));
+        assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn test_values() {
+        let mut trie = TrieMapBase16::new();
+        trie.insert("hello", 1);
+        trie.insert("world", 2);
+        trie.insert("こんにちは", 3);
+        trie.insert("世界", 4);
+
+        let mut iter = trie.values();
+        assert_eq!(iter.next(), Some(&1));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), None);
+
+        let mut iter = trie.values().rev();
+        assert_eq!(iter.next(), Some(&4));
+        assert_eq!(iter.next(), Some(&3));
+        assert_eq!(iter.next(), Some(&2));
+        assert_eq!(iter.next(), Some(&1));
         assert_eq!(iter.next(), None);
     }
 }

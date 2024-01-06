@@ -29,9 +29,21 @@ array of 26 length, which are indexed into directly by the next character's byte
 value minus `BASE_CHAR`.
 
 The methods of the trie support key types of `String`, `&str`, `&[u8]`, and 
-other types that implement either `AsRef<[u8]>` or `IntoIterator<Item=&u8>`.
+other types that implement either `AsRef<[u8]>` or `IntoIterator<Item=u8>`.
 Internally, the key's bytes are iterated over to populate the trie. These 
 bytes can be UTF-8/ASCII compatible characters, or they could represent
 anything suitable to a project's requirements so long as `RANGE` and
 `BASE_CHAR` are correctly specified.
 
+This crate provides `trie_map_base16::TrieMapBase16<V>` which wraps a 
+`TrieMap<V, 16, b'a'>` instance and base16 encodes its keys so there's no 
+restriction on the characters in strings used as keys. Strings could be in 
+Greek, or any language for that matter, and contain special characters.
+
+`TrieMapBase16<V>` progressively encodes the keys passed to it, so in cases
+where an operation such as `get()` is being performed and the key is not
+in the trie, it will fail early only having processed the minimum number of
+bytes of the key necessary to determine the miss.
+
+`TrieMapBase16<V>` demonstrates the flexibility of `TrieMap<V, R, B>` which
+can be used in other specialized custom tries.
