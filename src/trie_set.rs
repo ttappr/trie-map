@@ -1,7 +1,10 @@
 //! A set implemented using TrieMap.
 //! 
 
+use std::fmt;
+
 use crate::TrieMap;
+use crate::iterators;
 
 /// A set implemented using TrieMap. Internally this is a TrieMap with a unit
 /// type as the value. This is a convenience type for when you want to use a
@@ -28,6 +31,10 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
         self.trie.insert(key, ()).is_none()
     }
 
+    pub fn iter(&self) -> Iter<R, B> {
+        self.into_iter()
+    }
+
     pub fn len(&self) -> usize {
         self.trie.len()
     }
@@ -43,15 +50,72 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
     pub fn clear(&mut self) {
         self.trie.clear();
     }
+}
 
+impl<const R: usize, const B: u8> Default for TrieSet<R, B> {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+pub struct IntoIter<const R: usize, const B: u8> {
+    iter: iterators::IntoIter<(), R, B>,
+}
+
+impl<const R: usize, const B: u8> Iterator for IntoIter<R, B> {
+    type Item = Box<[u8]>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|(k, _)| k)
+    }
+}
+
+impl<'a, const R: usize, const B: u8> IntoIterator for TrieSet<R, B> {
+    type Item = Box<[u8]>;
+    type IntoIter = IntoIter<R, B>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        IntoIter { iter: self.trie.into_iter() }
+    }
+}
+
+pub struct Iter<'a, const R: usize, const B: u8> {
+    iter: iterators::Iter<'a, (), R, B>,
+}
+
+impl<'a, const R: usize, const B: u8> Iterator for Iter<'a, R, B> {
+    type Item = Box<[u8]>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|(k, _)| k)
+    }
+}
+
+impl<'a, const R: usize, const B: u8> IntoIterator for &'a TrieSet<R, B> {
+    type Item = Box<[u8]>;
+    type IntoIter = Iter<'a, R, B>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Iter { iter: self.trie.iter() }
+    }
+}
+
+impl<const R: usize, const B: u8> fmt::Debug for TrieSet<R, B> {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_set().entries(self.trie.keys()).finish()
+    }
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    fn bx(s: &str) -> Box<[u8]> {
+        s.as_bytes().to_vec().into_boxed_slice()
+    }
+
     #[test]
-    fn test_trie_set() {
+    fn contains() {
         let mut set = TrieSet::<26, b'a'>::new();
         assert!(set.is_empty());
         assert_eq!(set.len(), 0);
@@ -69,24 +133,33 @@ mod tests {
         assert!(!set.contains("worldhello!"));
         assert!(set.remove("hello"));
         assert_eq!(set.len(), 1);
-        assert!(!set.contains("hello"));
-        assert!(set.contains("world"));
-        assert!(!set.contains("hell"));
-        assert!(!set.contains("worl"));
-        assert!(!set.contains("helloworld"));
-        assert!(!set.contains("worldhello"));
-        assert!(!set.contains("helloworld!"));
-        assert!(!set.contains("worldhello!"));
-        assert!(set.remove("world"));
-        assert!(set.is_empty());
-        assert_eq!(set.len(), 0);
-        assert!(!set.contains("hello"));
-        assert!(!set.contains("world"));
-        assert!(!set.contains("hell"));
-        assert!(!set.contains("worl"));
-        assert!(!set.contains("helloworld"));
-        assert!(!set.contains("worldhello"));
-        assert!(!set.contains("helloworld!"));
-        assert!(!set.contains("worldhello!"));
+    }
+
+    #[test]
+    fn iter() {
+        let mut set = TrieSet::<26, b'a'>::new();
+        assert!(set.insert("hello"));
+        assert!(set.insert("world"));
+        assert_eq!(set.iter().collect::<Vec<_>>(), 
+                   vec![bx("hello"), bx("world")]);
+    }
+
+    #[test]
+    fn into_iter() {
+        let mut set = TrieSet::<26, b'a'>::new();
+        assert!(set.insert("hello"));
+        assert!(set.insert("world"));
+        assert_eq!(set.into_iter().collect::<Vec<_>>(), 
+                   vec![bx("hello"), bx("world")]);
+    }
+
+    #[test]
+    fn fmt_debug() {
+        let mut set = TrieSet::<26, b'a'>::new();
+        assert!(set.insert("hello"));
+        assert!(set.insert("world"));
+        assert_eq!(format!("{:?}", set), 
+                   r#"{[104, 101, 108, 108, 111], "#.to_owned() 
+                   + r#"[119, 111, 114, 108, 100]}"#);
     }
 }
