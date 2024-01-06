@@ -15,38 +15,81 @@ pub struct TrieSet<const R: usize, const B: u8> {
 }
 
 impl<const R: usize, const B: u8> TrieSet<R, B> {
+    /// Creates a new empty TrieSet.
+    /// 
     pub fn new() -> Self {
         Self { trie: TrieMap::new() }
     }
 
+    /// Reports whether the set contains the given key.
+    /// 
     pub fn contains<K: AsRef<[u8]>>(&self, key: K) -> bool {
         self.trie.get(key).is_some()
     }
 
-    pub fn get<K: AsRef<[u8]>>(&self, key: K) -> Option<&()> {
-        self.trie.get(key)
+    /// Reports whether the set contains the given key. The key is given as an
+    /// iterator.
+    /// 
+    pub fn contains_by_iter<K>(&self, key: K) -> bool 
+    where
+        K: Iterator<Item = u8>
+    {
+        self.trie.contains_by_iter(key)
     }
 
+    /// Inserts the given key into the set. Returns true if the key was not
+    /// already present.
+    /// 
     pub fn insert<K: AsRef<[u8]>>(&mut self, key: K) -> bool {
         self.trie.insert(key, ()).is_none()
     }
 
+    /// Inserts the given key into the set. Returns true if the key was not
+    /// already present. The key is given as an iterator.
+    /// 
+    pub fn insert_by_iter<K>(&mut self, key: K) -> bool 
+    where
+        K: Iterator<Item = u8>
+    {
+        self.trie.insert_by_iter(key, ()).is_none()
+    }
+
+    /// Returns an iterator over the keys of the set.
+    /// 
     pub fn iter(&self) -> Iter<R, B> {
         self.into_iter()
     }
 
+    /// Returns the number of elements in the set.
+    /// 
     pub fn len(&self) -> usize {
         self.trie.len()
     }
 
+    /// Returns true if the set contains no elements.
+    /// 
     pub fn is_empty(&self) -> bool {
         self.trie.is_empty()
     }
 
+    /// Removes the given key from the set. Returns true if the key was present.
+    /// 
     pub fn remove<K: AsRef<[u8]>>(&mut self, key: K) -> bool {
         self.trie.remove(key).is_some()
     }
 
+    /// Removes the given key from the set. Returns true if the key was present.
+    /// The key is given as an iterator.
+    /// 
+    pub fn remove_by_iter<K>(&mut self, key: K) -> bool 
+    where
+        K: Iterator<Item = u8>
+    {
+        self.trie.remove_by_iter(key).is_some()
+    }
+
+    /// Removes all elements from the set.
+    /// 
     pub fn clear(&mut self) {
         self.trie.clear();
     }
