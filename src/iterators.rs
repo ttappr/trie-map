@@ -1,7 +1,13 @@
 //! # Iterators, The Iterators Used in TrieMap
 //! 
 //! Each iterator implements the InnerIter trait, which provides the traversal
-//! algorithms. 
+//! algorithms. The iterators perform a traversal of the trie, advancing through
+//! its nodes on each call to next() or next_back(). No intermediate 
+//! representation is used to store keys or values.
+//! 
+//! The iterators support forward and backward iteration and can reverse
+//! direction at any time without having to restart. They also can start
+//! iteration again after reaching their end.
 //! 
 
 use crate::trie_map::*;
