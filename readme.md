@@ -47,3 +47,19 @@ bytes of the key necessary to determine the miss.
 
 `TrieMapBase16<V>` demonstrates the flexibility of `TrieMap<V, R, B>` which
 can be used in other specialized custom tries.
+
+``` rust
+    use trie_map::trie_map_base16::TrieMapBase16;
+    
+    let mut trie = TrieMapBase16::new();
+    
+    trie.insert("Γειά σου", 1);
+    trie.insert("κόσμος", 2);
+    trie.insert("👋", 42);
+    trie.insert("🌍", 43);
+    
+    assert_eq!(trie.get("Γειά σου"), Some(&1));
+    assert_eq!(trie.get("κόσμος"), Some(&2));
+    assert_eq!(trie.get("👋"), Some(&42));
+    assert_eq!(trie.get("🌍"), Some(&43));
+```
