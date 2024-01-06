@@ -36,11 +36,11 @@ impl<V> TrieMapBase16<V> {
     /// 
     /// let mut trie = TrieMapBase16::new();
     /// 
-    /// trie.insert("Γειά σου", 1);
-    /// trie.insert("Κόσμε", 2);
+    /// trie.insert("👋", 1);
+    /// trie.insert("🌍", 2);
     /// 
-    /// assert_eq!(trie.get("Γειά σου"), Some(&1));
-    /// assert_eq!(trie.get("Κόσμε"), Some(&2));
+    /// assert_eq!(trie.get("👋"), Some(&1));
+    /// assert_eq!(trie.get("🌍"), Some(&2));
     /// 
     /// ````
     pub fn get(&self, key: &str) -> Option<&V> {
@@ -368,6 +368,12 @@ mod tests {
         assert_eq!(trie.insert("世界", 4), None);
         assert_eq!(trie.get("世界"), Some(&4));
         assert_eq!(trie.get("こんにちは"), Some(&3));
+
+        trie.insert("👋", 42);
+        trie.insert("🌍", 43);
+
+        assert_eq!(trie.get("👋"), Some(&42));
+        assert_eq!(trie.get("🌍"), Some(&43));
     }
 
     #[test]
