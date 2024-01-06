@@ -123,7 +123,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: AsRef<[u8]>,
     {
-        self.contains_by_iter(key.as_ref())
+        self.contains_by_iter(key.as_ref().into_iter().copied())
     }
 
     /// Returns `true` if the trie contains a value at the given key, otherwise
@@ -143,14 +143,15 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// window.pop_front();
     /// window.push_back(b'o');
     /// 
-    /// assert_eq!(trie.contains_by_iter(window.range(0..5)), true);
+    /// assert_eq!(trie.contains_by_iter(window.range(0..5).copied()), true);
     /// ```
-    pub fn contains_by_iter<'a, K>(&self, key: K) -> bool
+    pub fn contains_by_iter<K>(&self, key: K) -> bool
     where
-        K: IntoIterator<Item=&'a u8>,
+        K: Iterator<Item=u8>,
     {
+        let mut key   = key;
         let mut hcurr = self.root;
-        for b in key {
+        while let Some(b) = key.next() {
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
@@ -177,7 +178,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: AsRef<[u8]>,
     {
-        self.get_by_iter(key.as_ref())
+        self.get_by_iter(key.as_ref().into_iter().copied())
     }
 
     /// Accesses a value in the trie at the given key, if it exists, a reference
@@ -197,14 +198,15 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// window.pop_front();
     /// window.push_back(b'o');
     ///
-    /// assert_eq!(trie.get_by_iter(window.range(0..5)), Some(&1));
+    /// assert_eq!(trie.get_by_iter(window.range(0..5).copied()), Some(&1));
     /// ````
-    pub fn get_by_iter<'a, K>(&self, key: K) -> Option<&V>
+    pub fn get_by_iter<K>(&self, key: K) -> Option<&V>
     where
-        K: IntoIterator<Item=&'a u8>,
+        K: Iterator<Item=u8>,
     {
+        let mut key   = key;
         let mut hcurr = self.root;
-        for b in key {
+        while let Some(b) = key.next() {
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
@@ -236,7 +238,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: AsRef<[u8]>,
     {
-        self.get_mut_by_iter(key.as_ref())
+        self.get_mut_by_iter(key.as_ref().into_iter().copied())
     }
 
     /// Returns a mutable reference to a value in the trie at the given key, if
@@ -249,16 +251,20 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
     /// trie.insert(b"hello", 1);
-    ///
-    /// *trie.get_mut_by_iter(b"hel".iter().chain(b"lo")).unwrap() = 17;
+    /// 
+    /// let iter = b"hel".iter().chain(b"lo").copied();
+    /// 
+    /// *trie.get_mut_by_iter(iter).unwrap() = 17;
+    /// 
     /// assert_eq!(trie.get(b"hello"), Some(&17));
     /// ```
     pub fn get_mut_by_iter<'a, K>(&mut self, key: K) -> Option<&mut V>
     where
-        K: IntoIterator<Item=&'a u8>,
+        K: Iterator<Item=u8>,
     {
+        let mut key   = key;
         let mut hcurr = self.root;
-        for b in key {
+        while let Some(b) = key.next() {
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
@@ -287,7 +293,8 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: AsRef<[u8]>,
     {
-        self.get_or_insert_by_iter_with(key.as_ref(), ||value)
+        let iter = key.as_ref().into_iter().copied();
+        self.get_or_insert_by_iter_with(iter, ||value)
     }
 
     /// Returns a mutable reference to a value in the trie at the given key, if
@@ -299,7 +306,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// let iter = b"hello".iter().chain(b"world");
+    /// let iter = b"hello".iter().chain(b"world").copied();
     ///
     /// *trie.get_or_insert_by_iter(iter, 1) = 17;
     ///
@@ -307,7 +314,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// ```
     pub fn get_or_insert_by_iter<'a, K>(&mut self, key: K, value: V) -> &mut V
     where
-        K: IntoIterator<Item=&'a u8>,
+        K: Iterator<Item=u8>,
     {
         self.get_or_insert_by_iter_with(key, ||value)
     }
@@ -328,7 +335,8 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         K: AsRef<[u8]>,
         F: FnOnce() -> V,
     {
-        self.get_or_insert_by_iter_with(key.as_ref(), f)
+        let iter = key.as_ref().into_iter().copied();
+        self.get_or_insert_by_iter_with(iter, f)
     }
 
     /// Returns a mutable reference to a value in the trie at the given key, if
@@ -341,7 +349,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// let iter = b"hello".iter().chain(b"world");
+    /// let iter = b"hello".iter().chain(b"world").copied();
     ///
     /// *trie.get_or_insert_by_iter_with(iter, ||1) = 17;
     ///
@@ -350,11 +358,12 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     pub fn get_or_insert_by_iter_with<'a, K, F>(&mut self, key: K, f: F)
         -> &mut V
     where
-        K: IntoIterator<Item=&'a u8>,
+        K: Iterator<Item=u8>,
         F: FnOnce() -> V,
     {
+        let mut key   = key;
         let mut hcurr = self.root;
-        for b in key {
+        while let Some(b) = key.next() {
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
@@ -394,7 +403,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: AsRef<[u8]>,
     {
-        self.insert_by_iter(key.as_ref(), value)
+        self.insert_by_iter(key.as_ref().into_iter().copied(), value)
     }
 
     /// Inserts a value into the trie at the given key. The trait bound on `K`
@@ -405,11 +414,12 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     pub fn insert_by_iter<'a, K>(&mut self, key: K, value: V) -> Option<V>
     where
-        K: IntoIterator<Item=&'a u8>,
+        K: Iterator<Item=u8>,
     {
+        let mut key    = key;
         let mut hcurr  = self.root;
         let mut retval = None;
-        for b in key {
+        while let Some(b) = key.next() {
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 hcurr = hnext;
@@ -521,7 +531,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: AsRef<[u8]>,
     {
-        self.remove_by_iter(key.as_ref())
+        self.remove_by_iter(key.as_ref().into_iter().copied())
     }
 
     /// Removes a value from the trie at the given key, if it exists, and
@@ -533,17 +543,18 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::with_capacity(10);
     ///
-    /// trie.insert(b"hello", 1);
+    /// trie.insert("hello", 1);
     ///
-    /// assert_eq!(trie.remove_by_iter(b"hello"), Some(1));
+    /// assert_eq!(trie.remove_by_iter("hello".bytes()), Some(1));
     /// ```
     pub fn remove_by_iter<'a, K>(&mut self, key: K) -> Option<V>
     where
-        K: IntoIterator<Item=&'a u8>,
+        K: Iterator<Item=u8>,
     {
+        let mut key   = key;
         let mut hcurr = self.root;
         let mut stack = Vec::new();
-        for b in key {
+        while let Some(b) = key.next() {
             let ichild = (b - BASE_CHAR) as usize;
             if let Some(hnext) = self.hderef(hcurr).child[ichild] {
                 stack.push((hcurr, ichild));
