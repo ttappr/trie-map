@@ -642,20 +642,13 @@ mod tests {
                         .unwrap();
 
         assert_eq!(sort1, words);
-/*
+
         let sort2 = trie.keys().rev()
                         .map(|b| Ok(String::from_utf8(b.to_vec())?))
                         .collect::<Result<Vec<_>, Box<dyn Error>>>()
                         .unwrap();
-*/
-        let mut sort2 = Vec::new();
-
-        for key in trie.keys().rev() {
-            sort2.push(String::from_utf8(key.to_vec()).unwrap());
-        }
 
         words.sort_by(|a, b| b.cmp(a));
-
         assert_eq!(sort2, words);
     }
 
