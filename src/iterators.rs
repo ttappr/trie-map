@@ -72,19 +72,19 @@ trait InnerIter<V, const R: usize, const B: u8> {
     /// 
     fn inner_next_back(&mut self) -> Option<Self::Item> {
         if self.stack().is_empty() {
-            self.stack().push((ROOT_HANDLE, R, true));
+            self.stack().push((ROOT_HANDLE, R + 1, false));
         }
-        while let Some((hcurr, mut ichild, b)) = self.stack().pop() {
+        while let Some((hcurr, mut ichild, _b)) = self.stack().pop() {
             let curr = self.hderef(hcurr);
-            while ichild > 0 && curr.child[ichild - 1].is_none() {
+            while ichild > 1 && curr.child[ichild - 2].is_none() {
                 ichild -= 1;
             }
-            if ichild > 0 {
-                let hchild = curr.child[ichild - 1].unwrap();
-                self.key().push(ichild as u8 + B - 1);
-                self.stack().push((hcurr, ichild - 1, true));
-                self.stack().push((hchild, R, true));
-            } else if curr.value.is_some() && b {
+            if ichild > 1 {
+                let hchild = curr.child[ichild - 2].unwrap();
+                self.key().push(ichild as u8 + B - 2);
+                self.stack().push((hcurr, ichild - 1, false));
+                self.stack().push((hchild, R + 1, true));
+            } else if curr.value.is_some() {
                 let hval = curr.value.unwrap();
                 let key  = self.key().clone().into_boxed_slice();
                 self.key().pop();
@@ -95,6 +95,7 @@ trait InnerIter<V, const R: usize, const B: u8> {
         }
         None
     }
+
 }
 
 /// A consuming iterator over the key-value pairs of a `TrieMap`.
@@ -485,6 +486,33 @@ mod tests {
     }
 
     #[test]
+    fn switching_direction_of_iteration() {
+        let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+        trie.insert(b"alpha", 1);
+        trie.insert(b"beta", 2);
+        trie.insert(b"delta", 3);
+        trie.insert(b"epsilon", 4);
+        trie.insert(b"gamma", 5);
+
+        let mut iter = trie.iter();
+
+        assert_eq!(iter.next(), Some((bx(b"alpha"), &1)));
+        assert_eq!(iter.next(), Some((bx(b"beta"), &2)));
+        assert_eq!(iter.next(), Some((bx(b"delta"), &3)));
+        assert_eq!(iter.next(), Some((bx(b"epsilon"), &4)));
+
+        assert_eq!(iter.next_back(), Some((bx(b"epsilon"), &4)));
+        assert_eq!(iter.next_back(), Some((bx(b"delta"), &3)));
+        assert_eq!(iter.next_back(), Some((bx(b"beta"), &2)));
+        assert_eq!(iter.next_back(), Some((bx(b"alpha"), &1)));
+        assert_eq!(iter.next_back(), None);
+
+        assert_eq!(iter.next(), Some((bx(b"alpha"), &1)));
+        assert_eq!(iter.next(), Some((bx(b"beta"), &2)));
+        assert_eq!(iter.next(), Some((bx(b"delta"), &3)));
+    }
+
+    #[test]
     fn iter_mut() {
         let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
 
@@ -614,11 +642,17 @@ mod tests {
                         .unwrap();
 
         assert_eq!(sort1, words);
-
+/*
         let sort2 = trie.keys().rev()
                         .map(|b| Ok(String::from_utf8(b.to_vec())?))
                         .collect::<Result<Vec<_>, Box<dyn Error>>>()
                         .unwrap();
+*/
+        let mut sort2 = Vec::new();
+
+        for key in trie.keys().rev() {
+            sort2.push(String::from_utf8(key.to_vec()).unwrap());
+        }
 
         words.sort_by(|a, b| b.cmp(a));
 
