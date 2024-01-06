@@ -40,11 +40,11 @@ impl<V> TrieMapBase16<V> {
     /// 
     /// let mut trie = TrieMapBase16::new();
     /// 
-    /// trie.insert("👋", 1);
-    /// trie.insert("🌍", 2);
+    /// trie.insert("Γειά σου", 1);
+    /// trie.insert("κόσμος", 2);
     /// 
-    /// assert_eq!(trie.get("👋"), Some(&1));
-    /// assert_eq!(trie.get("🌍"), Some(&2));
+    /// assert_eq!(trie.get("Γειά σου"), Some(&1));
+    /// assert_eq!(trie.get("κόσμος"), Some(&2));
     /// 
     /// ````
     pub fn get(&self, key: &str) -> Option<&V> {
@@ -154,13 +154,14 @@ impl<V> TrieMapBase16<V> {
 struct Encoder<K> {
     key: K,
     buf: u8,
+    idx: usize,
 }
 impl<K> Encoder<K> 
 where
     K: Iterator<Item=u8>,
 {
     fn new(iter: K) -> Self {
-        Self { key: iter, buf: 0 }
+        Self { key: iter, buf: 0, idx: 0 }
     }
 }
 
@@ -173,7 +174,8 @@ where
     /// Progressively Base16 encodes the key as it advances during iteration.
     /// 
     fn next(&mut self) -> Option<Self::Item> {
-        if self.buf > 0 {
+        self.idx += 1;
+        if self.idx & 1 == 0 {
             let b = self.buf;
             self.buf = 0;
             Some(b + b'a')
@@ -337,6 +339,31 @@ impl<'a, V> DoubleEndedIterator for Values<'a, V> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn emoji_keys() {
+        let mut trie = TrieMapBase16::new();
+        
+        trie.insert("👋", 42);
+        trie.insert("🌍", 43);
+
+        assert_eq!(trie.get("👋"), Some(&42));
+        assert_eq!(trie.get("🌍"), Some(&43));
+
+        for (k1, k2) in trie.keys().zip(["🌍", "👋"].iter()) {
+            assert_eq!(k1, k2.to_string());
+        }
+
+        trie.insert("hello", 42);
+        trie.insert("world", 43);
+
+        assert_eq!(trie.get("hello"), Some(&42));
+        assert_eq!(trie.get("world"), Some(&43));
+
+        for (k1, k2) in trie.keys().zip(["hello", "world"].iter()) {
+            assert_eq!(k1, k2.to_string());
+        }
+    }
 
     #[test]
     fn insert() {
