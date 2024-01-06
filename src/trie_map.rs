@@ -18,6 +18,8 @@
 //! bytes.
 //!
 
+use std::fmt;
+
 use crate::iterators::{Iter, IterMut, Keys, Values};
 
 pub(crate) const ROOT_HANDLE: NodeHandle = NodeHandle(0);
@@ -673,6 +675,15 @@ impl<V, const R: usize, const B: u8> Default for TrieMap<V, R, B> {
     }
 }
 
+impl<V, const R: usize, const B: u8> fmt::Debug for TrieMap<V, R, B>
+where
+    V: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_map().entries(self.iter()).finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -823,5 +834,17 @@ mod tests {
         for (&val1, &val2) in iter {
             assert_eq!(val1, val2);
         }
+    }
+
+    #[test]
+    fn fmt_debug() {
+        let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+
+        trie.insert(b"hello", 1);
+        trie.insert(b"world", 2);
+
+        assert_eq!(format!("{:?}", trie), 
+                           r#"{[104, 101, 108, 108, 111]: 1, "#.to_owned()
+                           + r#"[119, 111, 114, 108, 100]: 2}"#);
     }
 }

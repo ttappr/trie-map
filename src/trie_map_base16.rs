@@ -3,6 +3,7 @@
 //! 
 
 use std::borrow::Borrow;
+use std::fmt;
 
 use crate::TrieMap;
 
@@ -340,6 +341,15 @@ impl<'a, V> DoubleEndedIterator for Values<'a, V> {
     }
 }
 
+impl<V> fmt::Debug for TrieMapBase16<V> 
+where
+    V: fmt::Debug,
+{
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_map().entries(self.iter()).finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -550,5 +560,18 @@ mod tests {
         assert_eq!(iter.next(), Some(&2));
         assert_eq!(iter.next(), Some(&1));
         assert_eq!(iter.next(), None);
+    }
+
+    #[test]
+    fn fmt_debug() {
+        let mut trie = TrieMapBase16::new();
+        trie.insert("hello", 1);
+        trie.insert("world", 2);
+        trie.insert("こんにちは", 3);
+        trie.insert("世界", 4);
+        assert_eq!(
+            format!("{:?}", trie),
+            r#"{"hello": 1, "world": 2, "こんにちは": 3, "世界": 4}"#
+        );
     }
 }
