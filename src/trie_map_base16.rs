@@ -12,11 +12,11 @@ use crate::TrieMap;
 /// can be inserted with a key. The values are stored in independent contiguous
 /// memory, while the terminal trie nodes hold handles to their values.
 /// 
-pub struct TrieMapBase26<V> {
+pub struct TrieMapBase16<V> {
     trie: TrieMap<V, 16, b'a'>,
 }
 
-impl<V> TrieMapBase26<V> { 
+impl<V> TrieMapBase16<V> { 
     pub fn new() -> Self {
         Self { trie: TrieMap::new() }
     }
@@ -33,8 +33,29 @@ impl<V> TrieMapBase26<V> {
         self.trie.get_mut_by_iter(Encoder::new(key.bytes()))
     }
 
-    pub fn insert<K: Borrow<str>>(&mut self, key: K, value: V) -> Option<V> {
-        self.trie.insert_by_iter(Encoder::new(key.borrow().bytes()), value)
+    pub fn get_or_insert<K>(&mut self, key: K, value: V) -> &mut V 
+    where
+        K: Borrow<str>,
+    {
+        let iter = Encoder::new(key.borrow().bytes());
+        self.trie.get_or_insert_by_iter(iter, value)
+    }
+
+    pub fn get_or_insert_with<K, F>(&mut self, key: K, f: F) -> &mut V 
+    where
+        K: Borrow<str>,
+        F: FnOnce() -> V,
+    {
+        let iter = Encoder::new(key.borrow().bytes());
+        self.trie.get_or_insert_by_iter_with(iter, f)
+    }
+
+    pub fn insert<K>(&mut self, key: K, value: V) -> Option<V> 
+    where
+        K: Borrow<str>,
+    {
+        let iter = Encoder::new(key.borrow().bytes());
+        self.trie.insert_by_iter(iter, value)
     }
 
     pub fn iter(&self) -> Iter<V> {
@@ -118,7 +139,7 @@ impl<V> Iterator for IntoIter<V> {
     }
 }
 
-impl<V> IntoIterator for TrieMapBase26<V> {
+impl<V> IntoIterator for TrieMapBase16<V> {
     type Item = (String, V);
     type IntoIter = IntoIter<V>;
 
@@ -139,7 +160,7 @@ impl<'a, V> Iterator for Iter<'a, V> {
     }
 }
 
-impl<'a, V> IntoIterator for &'a TrieMapBase26<V> {
+impl<'a, V> IntoIterator for &'a TrieMapBase16<V> {
     type Item = (String, &'a V);
     type IntoIter = Iter<'a, V>;
 
@@ -160,7 +181,7 @@ impl<'a, V> Iterator for IterMut<'a, V> {
     }
 }
 
-impl<'a, V> IntoIterator for &'a mut TrieMapBase26<V> {
+impl<'a, V> IntoIterator for &'a mut TrieMapBase16<V> {
     type Item = (String, &'a mut V);
     type IntoIter = IterMut<'a, V>;
 
@@ -175,7 +196,7 @@ mod tests {
 
     #[test]
     fn test_insert() {
-        let mut trie = TrieMapBase26::new();
+        let mut trie = TrieMapBase16::new();
         assert_eq!(trie.insert("hello", 1), None);
         assert_eq!(trie.insert("hello", 2), Some(1));
         assert_eq!(trie.insert("world", 3), None);
@@ -193,7 +214,7 @@ mod tests {
 
     #[test]
     fn test_get() {
-        let mut trie = TrieMapBase26::new();
+        let mut trie = TrieMapBase16::new();
         assert_eq!(trie.get("hello"), None);
         assert_eq!(trie.insert("hello", 1), None);
         assert_eq!(trie.get("hello"), Some(&1));
@@ -213,7 +234,7 @@ mod tests {
 
     #[test]
     fn test_get_mut() {
-        let mut trie = TrieMapBase26::new();
+        let mut trie = TrieMapBase16::new();
         assert_eq!(trie.get_mut("hello"), None);
         assert_eq!(trie.insert("hello", 1), None);
         assert_eq!(trie.get_mut("hello"), Some(&mut 1));
@@ -224,8 +245,29 @@ mod tests {
     }
 
     #[test]
+    fn test_get_or_insert() {
+        let mut trie = TrieMapBase16::new();
+        assert_eq!(trie.get_or_insert("hello", 1), &mut 1);
+        assert_eq!(trie.get_or_insert("hello", 2), &mut 1);
+        assert_eq!(trie.get_or_insert("world", 3), &mut 3);
+        assert_eq!(trie.get_or_insert("world", 4), &mut 3);
+        assert_eq!(trie.get_or_insert("hello", 5), &mut 1);
+        assert_eq!(trie.get_or_insert("world", 6), &mut 3);
+
+        assert_eq!(trie.get_or_insert("こんにちは", 1), &mut 1);
+        assert_eq!(trie.get_or_insert("こんにちは", 2), &mut 1);
+        assert_eq!(trie.get_or_insert("世界", 3), &mut 3);
+        assert_eq!(trie.get_or_insert("世界", 4), &mut 3);
+        assert_eq!(trie.get_or_insert("こんにちは", 5), &mut 1);
+        assert_eq!(trie.get_or_insert("世界", 6), &mut 3);
+
+        *trie.get_or_insert("こんにちは", 0) = 99;
+        assert_eq!(trie.get_or_insert("こんにちは", 0), &mut 99);
+    }
+
+    #[test]
     fn test_contains() {
-        let mut trie = TrieMapBase26::new();
+        let mut trie = TrieMapBase16::new();
         assert_eq!(trie.contains("hello"), false);
         assert_eq!(trie.insert("hello", 1), None);
         assert_eq!(trie.contains("hello"), true);
@@ -237,7 +279,7 @@ mod tests {
 
     #[test]
     fn test_remove() {
-        let mut trie = TrieMapBase26::new();
+        let mut trie = TrieMapBase16::new();
         assert_eq!(trie.remove("hello"), None);
         assert_eq!(trie.insert("hello", 1), None);
         assert_eq!(trie.remove("hello"), Some(1));
@@ -246,7 +288,7 @@ mod tests {
 
     #[test]
     fn test_iter() {
-        let mut trie = TrieMapBase26::new();
+        let mut trie = TrieMapBase16::new();
         trie.insert("hello", 1);
         trie.insert("world", 2);
         trie.insert("こんにちは", 3);
@@ -259,5 +301,4 @@ mod tests {
         assert_eq!(iter.next(), Some(("世界".to_string(), 4)));
         assert_eq!(iter.next(), None);
     }
-
 }
