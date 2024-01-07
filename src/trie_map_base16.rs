@@ -187,9 +187,10 @@ impl<V> TrieMapBase16<V> {
     }
 }
 
-/// Internal iterator that encodes the key as it's iterated over.
+/// Internal iterator that encodes the key as it's iterated over. This is used
+/// to insert or acces the values of the trie.
 /// 
-struct Encoder<K> {
+pub(crate) struct Encoder<K> {
     key: K,
     buf: u8,
     idx: usize,
@@ -198,7 +199,7 @@ impl<K> Encoder<K>
 where
     K: Iterator<Item=u8>,
 {
-    fn new(iter: K) -> Self {
+    pub(crate) fn new(iter: K) -> Self {
         Self { key: iter, buf: 0, idx: 0 }
     }
 }
@@ -227,12 +228,13 @@ where
     }
 }
 
-/// Decodes a Base16 encoded string into a `String`.
+/// Decodes a Base16 encoded string into a `String`. This function is used 
+/// by iterators to reconstruct the keys from byte slices.
 /// 
-fn decode(bytes: &[u8]) -> String {
+pub(crate) fn decode(bytes: Box<[u8]>) -> String {
     let mut str = Vec::new();
     let mut buf = 0;
-    for (i, b) in bytes.iter().copied().enumerate() {
+    for (i, b) in bytes.into_iter().enumerate() {
         if i & 1 == 0 {
             buf = (b - b'a') << 4;
         } else {
@@ -251,13 +253,13 @@ impl<V> Iterator for IntoIter<V> {
     type Item = (String, V);
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|(k, v)| (decode(&k), v))
+        self.iter.next().map(|(k, v)| (decode(k), v))
     }
 }
 
 impl<V> DoubleEndedIterator for IntoIter<V> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.iter.next_back().map(|(k, v)| (decode(&k), v))
+        self.iter.next_back().map(|(k, v)| (decode(k), v))
     }
 }
 
@@ -278,13 +280,13 @@ impl<'a, V> Iterator for Iter<'a, V> {
     type Item = (String, &'a V);
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|(k, v)| (decode(&k), v))
+        self.iter.next().map(|(k, v)| (decode(k), v))
     }
 }
 
 impl<'a, V> DoubleEndedIterator for Iter<'a, V> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.iter.next_back().map(|(k, v)| (decode(&k), v))
+        self.iter.next_back().map(|(k, v)| (decode(k), v))
     }
 }
 
@@ -305,13 +307,13 @@ impl<'a, V> Iterator for IterMut<'a, V> {
     type Item = (String, &'a mut V);
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|(k, v)| (decode(&k), v))
+        self.iter.next().map(|(k, v)| (decode(k), v))
     }
 }
 
 impl<'a, V> DoubleEndedIterator for IterMut<'a, V> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.iter.next_back().map(|(k, v)| (decode(&k), v))
+        self.iter.next_back().map(|(k, v)| (decode(k), v))
     }
 }
 
@@ -338,13 +340,13 @@ impl<'a, V> Iterator for Keys<'a, V> {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|k| decode(&k))
+        self.iter.next().map(|k| decode(k))
     }
 }
 
 impl<'a, V> DoubleEndedIterator for Keys<'a, V> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.iter.next_back().map(|k| decode(&k))
+        self.iter.next_back().map(|k| decode(k))
     }
 }
 
