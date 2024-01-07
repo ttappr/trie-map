@@ -261,7 +261,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// 
     /// assert_eq!(trie.get(b"hello"), Some(&17));
     /// ```
-    pub fn get_mut_by_iter<'a, K>(&mut self, key: K) -> Option<&mut V>
+    pub fn get_mut_by_iter<K>(&mut self, key: K) -> Option<&mut V>
     where
         K: Iterator<Item=u8>,
     {
@@ -316,7 +316,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// assert_eq!(trie.get(b"helloworld"), Some(&17));
     /// ```
-    pub fn get_or_insert_by_iter<'a, K>(&mut self, key: K, value: V) -> &mut V
+    pub fn get_or_insert_by_iter<K>(&mut self, key: K, value: V) -> &mut V
     where
         K: Iterator<Item=u8>,
     {
@@ -359,7 +359,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// assert_eq!(trie.get(b"helloworld"), Some(&17));
     /// ```
-    pub fn get_or_insert_by_iter_with<'a, K, F>(&mut self, key: K, f: F)
+    pub fn get_or_insert_by_iter_with<K, F>(&mut self, key: K, f: F)
         -> &mut V
     where
         K: Iterator<Item=u8>,
@@ -417,12 +417,13 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// the value is replaced and the old value is returned, otherwise `None` is
     /// returned.
     ///
-    pub fn insert_by_iter<'a, K>(&mut self, key: K, value: V) -> Option<V>
+    pub fn insert_by_iter<K>(&mut self, key: K, value: V) -> Option<V>
     where
         K: Iterator<Item=u8>,
     {
         let mut key    = key;
         let mut hcurr  = self.root;
+        let mut newkey = false;
         let mut retval = None;
         while let Some(b) = key.next() {
             debug_assert!(b >= BASE_CHAR && b < BASE_CHAR + RANGE as u8);
@@ -435,6 +436,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
                 curr.child[ichild] = Some(hnew);
                 curr.len += 1;
                 hcurr = hnew;
+                newkey = true;
             }
         }
         if let Some(hvalue) = self.hderef_mut(hcurr).value {
@@ -442,6 +444,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         }
         let hvalue = self.new_value(value);
         self.hderef_mut(hcurr).value = Some(hvalue);
+        if newkey { self.len += 1; }
         retval
     }
 
@@ -553,7 +556,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// assert_eq!(trie.remove_by_iter("hello".bytes()), Some(1));
     /// ```
-    pub fn remove_by_iter<'a, K>(&mut self, key: K) -> Option<V>
+    pub fn remove_by_iter<K>(&mut self, key: K) -> Option<V>
     where
         K: Iterator<Item=u8>,
     {
@@ -588,6 +591,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
                     }
                 }
             }
+            self.len -= 1;
             Some(value)
         } else {
             None
@@ -630,7 +634,6 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
             hvalue
         } else {
             self.values.push(Some(value));
-            self.len += 1;
             ValueHandle(self.values.len() - 1)
         }
     }
@@ -648,7 +651,6 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     #[inline]
     fn del_value(&mut self, handle: ValueHandle) {
-        self.len -= 1;
         self.value_bin.push(handle);
     }
 
