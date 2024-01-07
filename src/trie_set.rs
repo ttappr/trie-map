@@ -21,6 +21,12 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
         Self { trie: TrieMap::new() }
     }
 
+    /// Removes all elements from the set.
+    /// 
+    pub fn clear(&mut self) {
+        self.trie.clear();
+    }
+
     /// Reports whether the set contains the given key.
     /// ```
     /// use trie_map::TrieSet;
@@ -118,12 +124,6 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
         K: Iterator<Item = u8>
     {
         self.trie.remove_by_iter(key).is_some()
-    }
-
-    /// Removes all elements from the set.
-    /// 
-    pub fn clear(&mut self) {
-        self.trie.clear();
     }
 }
 

@@ -5,10 +5,6 @@
 //! its nodes on each call to next() or next_back(). No intermediate 
 //! representation is used to store keys or values.
 //! 
-//! The iterators support forward and backward iteration and can reverse
-//! direction at any time without having to restart. They also can start
-//! iteration again after reaching their end.
-//! 
 
 use crate::trie_map::*;
 
@@ -18,7 +14,7 @@ use crate::trie_map::*;
 /// implemented by the iterators themselves, which only call the traversal
 /// algorithms of this trait.
 /// 
-trait BaseIter<V, const R: usize, const B: u8> {
+trait IterBase<V, const R: usize, const B: u8> {
     type Item;
 
     /// Returns a stack used to track where in the trie the iterator is.
@@ -117,7 +113,7 @@ impl<V, const R: usize, const B: u8> IntoIter<V, R, B> {
     }
 }
 
-impl<V, const R: usize, const B: u8> BaseIter<V, R, B> for IntoIter<V, R, B> {
+impl<V, const R: usize, const B: u8> IterBase<V, R, B> for IntoIter<V, R, B> {
     type Item = (Box<[u8]>, V);
 
     #[inline]
@@ -180,7 +176,7 @@ impl<'a, V, const R: usize, const B: u8> Iter<'a, V, R, B> {
 }
 
 impl<'a, V, const R: usize, const B: u8> 
-    BaseIter<V, R, B> for Iter<'a, V, R, B> 
+    IterBase<V, R, B> for Iter<'a, V, R, B> 
 {
     type Item = (Box<[u8]>, &'a V);
 
@@ -247,7 +243,7 @@ impl<'a, V, const R: usize, const B: u8> IterMut<'a, V, R, B> {
 }
 
 impl<'a, V, const R: usize, const B: u8> 
-    BaseIter<V, R, B> for IterMut<'a, V, R, B> 
+    IterBase<V, R, B> for IterMut<'a, V, R, B> 
 {
     type Item = (Box<[u8]>, &'a mut V);
 
@@ -513,6 +509,9 @@ mod tests {
         assert_eq!(iter.next_back(), Some((bx(b"alpha"), &1)));
         assert_eq!(iter.next_back(), None);
 
+        // Kind of a vague feature on how it's actually supposed to behave.
+        // Going forward then reverse, the last item is repeated. Going back
+        // then forward it's not. These test cases aren't hard bound.
         assert_eq!(iter.next_back(), Some((bx(b"gamma"), &5)));
         assert_eq!(iter.next_back(), Some((bx(b"epsilon"), &4)));
         assert_eq!(iter.next_back(), Some((bx(b"delta"), &3)));
