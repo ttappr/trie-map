@@ -35,10 +35,12 @@ bytes can be UTF-8/ASCII compatible characters, or they could represent
 anything suitable to a project's requirements so long as `RANGE` and
 `BASE_CHAR` are correctly specified.
 
-This crate provides `trie_map_base16::TrieMapBase16<V>` which wraps a 
-`TrieMap<V, 16, b'a'>` instance and base16 encodes its keys so there's no 
-restriction on the characters in strings used as keys. Strings could be in 
-Greek, or any language for that matter, and contain special characters.
+# Base 16 Wrappers
+
+This crate provides `trie_map_base16::{TrieMapBase16<V>, TrieSetBase16<V>}` 
+which wrap a `TrieMap<V, 16, b'a'>` instance and base16 encodes its keys so 
+there's no restriction on the characters in strings used as keys. Strings could 
+be in Greek, or any language for that matter, and contain special characters.
 
 `TrieMapBase16<V>` progressively encodes the keys passed to it, so in cases
 where an operation such as `get()` is being performed and the key is not

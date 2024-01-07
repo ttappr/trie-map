@@ -1,5 +1,6 @@
 
 use std::borrow::Borrow;
+use std::fmt;
 
 use crate::TrieMap;
 use crate::trie_map_base16::{Encoder, decode};
@@ -19,6 +20,13 @@ impl TrieSetBase16 {
 
     pub fn contains(&self, key: &str) -> bool {
         self.trie.contains_by_iter(Encoder::new(key.bytes()))
+    }
+
+    pub fn contains_by_iter<K>(&self, iter: K) -> bool
+    where
+        K: Iterator<Item = u8>,
+    {
+        self.trie.contains_by_iter(iter)
     }
 
     pub fn insert<K>(&mut self, key: K) -> bool 
@@ -43,6 +51,13 @@ impl TrieSetBase16 {
 
     pub fn remove(&mut self, key: &str) -> bool {
         self.trie.remove_by_iter(Encoder::new(key.bytes())).is_some()
+    }
+    
+    pub fn remove_by_iter<K>(&mut self, iter: K) -> bool
+    where
+        K: Iterator<Item = u8>,
+    {
+        self.trie.remove_by_iter(iter).is_some()
     }
 }
 
@@ -106,12 +121,61 @@ impl IntoIterator for TrieSetBase16 {
     }
 }
 
+impl fmt::Debug for TrieSetBase16 {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_set().entries(self.iter()).finish()
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
 
+    macro_rules! s { ($s:expr) => { $s.to_string() } }
+
     #[test]
-    fn test_trie_set_base16() {
+    fn clear() {
+        let mut set = TrieSetBase16::new();
+        set.insert("foo");
+        set.insert("bar");
+        set.insert("τροφή");
+        set.insert("μπαρ");
+        assert!(!set.is_empty());
+        assert_eq!(set.len(), 4);
+        set.clear();
+        assert!(set.is_empty());
+        assert_eq!(set.len(), 0);
+    }
+
+    #[test]
+    fn contains() {
+        let mut set = TrieSetBase16::new();
+        assert!(!set.contains("foo"));
+        set.insert("foo");
+        assert!(set.contains("foo"));
+        assert!(!set.contains("bar"));
+        set.insert("bar");
+        assert!(set.contains("foo"));
+        assert!(set.contains("bar"));
+        assert!(!set.contains("τροφή"));
+        assert!(!set.contains("μπαρ"));
+    }
+
+    #[test]
+    fn fmt_debug() {
+        let mut set = TrieSetBase16::new();
+        set.insert("foo");
+        set.insert("bar");
+        set.insert("τροφή");
+        set.insert("μπαρ");
+        assert_eq!(
+            format!("{:?}", set),
+            r#"{"bar", "foo", "μπαρ", "τροφή"}"#
+        );
+    }
+
+    #[test]
+    fn insert() {
         let mut set = TrieSetBase16::new();
         assert!(set.is_empty());
         assert_eq!(set.len(), 0);
@@ -122,26 +186,41 @@ mod tests {
         assert!(!set.contains("bar"));
         assert!(set.insert("bar"));
         assert_eq!(set.len(), 2);
-        assert!(set.contains("bar"));
-        assert!(set.remove("foo"));
-        assert_eq!(set.len(), 1);
-        assert!(!set.contains("foo"));
-        assert!(set.contains("bar"));
-        assert!(set.insert("foo"));
-        assert_eq!(set.len(), 2);
-        assert!(set.contains("foo"));
-        assert!(set.contains("bar"));
-        assert!(!set.insert("foo"));
-        assert_eq!(set.len(), 2);
-        assert!(set.contains("foo"));
-        assert!(set.contains("bar"));
-        assert!(!set.insert("bar"));
-        assert_eq!(set.len(), 2);
-        assert!(set.contains("foo"));
-        assert!(set.contains("bar"));
+    }
+
+    #[test]
+    fn is_empty() {
+        let mut set = TrieSetBase16::new();
+        assert!(set.is_empty());
+        set.insert("foo");
+        assert!(!set.is_empty());
+        set.remove("bar");
+        assert!(!set.is_empty());
+        set.remove("foo");
+        assert!(set.is_empty());
+    }
+    
+    #[test]
+    fn iter() {
+        let mut set = TrieSetBase16::new();
+        set.insert("foo");
+        set.insert("bar");
+        set.insert("τροφή");
+        set.insert("μπαρ");
+        assert_eq!(
+            set.iter().collect::<Vec<_>>(),
+            vec![s!("bar"), s!("foo"), 
+                 s!("μπαρ"), s!("τροφή")]
+        );
+        assert_eq!(
+            set.iter().rev().collect::<Vec<_>>(),
+            vec![s!("τροφή"), s!("μπαρ"), 
+                 s!("foo"), s!("bar")]
+        );
         assert_eq!(
             set.into_iter().collect::<Vec<_>>(),
-            vec!["bar".to_string(), "foo".to_string()]
+            vec![s!("bar"), s!("foo"), 
+                 s!("μπαρ"), s!("τροφή")]
         );
     }
 }

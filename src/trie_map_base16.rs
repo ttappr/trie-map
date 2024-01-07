@@ -34,6 +34,25 @@ impl<V> TrieMapBase16<V> {
         self.trie.get_by_iter(Encoder::new(key.bytes())).is_some()
     }
 
+    /// Returns `true` if the map contains a value for the specified key.
+    /// ```
+    /// use trie_map::trie_map_base16::TrieMapBase16;
+    /// 
+    /// let mut trie = TrieMapBase16::new();
+    /// 
+    /// trie.insert("Γειά σου", 1);
+    /// trie.insert("κόσμος", 2);
+    /// 
+    /// assert_eq!(trie.contains_by_iter("Γειά σου".bytes()), true);
+    /// assert_eq!(trie.contains_by_iter("κόσμος".bytes()), true);
+    /// ````
+    pub fn contains_by_iter<K>(&self, key: K) -> bool 
+    where
+        K: Iterator<Item=u8>,
+    {
+        self.trie.get_by_iter(Encoder::new(key)).is_some()
+    }
+
     /// Returns a reference to the value corresponding to the key, or `None` if
     /// the key is not present in the map.
     /// ```
@@ -56,11 +75,39 @@ impl<V> TrieMapBase16<V> {
         self.trie.get_by_iter(Encoder::new(key.bytes()))
     }
 
+    /// Returns a reference to the value corresponding to the key, or `None` if
+    /// the key is not present in the map.
+    /// ```
+    /// use trie_map::trie_map_base16::TrieMapBase16;
+    /// 
+    /// let mut trie = TrieMapBase16::new();
+    /// 
+    /// trie.insert("Γειά σου", 1);
+    /// 
+    /// assert_eq!(trie.get_by_iter("Γειά σου".bytes()), Some(&1));
+    /// ````
+    pub fn get_by_iter<K>(&self, key: K) -> Option<&V> 
+    where
+        K: Iterator<Item=u8>,
+    {
+        self.trie.get_by_iter(Encoder::new(key))
+    }
+
     /// Returns a mutable reference to the value corresponding to the key, or
     /// `None` if the key is not present in the map.
     /// 
     pub fn get_mut(&mut self, key: &str) -> Option<&mut V> {
         self.trie.get_mut_by_iter(Encoder::new(key.bytes()))
+    }
+
+    /// Returns a mutable reference to the value corresponding to the key, or
+    /// `None` if the key is not present in the map.
+    /// 
+    pub fn get_mut_by_iter<K>(&mut self, key: K) -> Option<&mut V> 
+    where
+        K: Iterator<Item=u8>,
+    {
+        self.trie.get_mut_by_iter(Encoder::new(key))
     }
 
     /// If the key-value pair is not present in the map, inserts it and returns
@@ -92,12 +139,37 @@ impl<V> TrieMapBase16<V> {
     /// a mutable reference to the value. If the key-value pair is present,
     /// returns a mutable reference to the already present value.
     /// 
+    pub fn get_or_insert_by_iter<K>(&mut self, key: K, value: V) -> &mut V 
+    where
+        K: Iterator<Item=u8>,
+    {
+        let iter = Encoder::new(key);
+        self.trie.get_or_insert_by_iter(iter, value)
+    }
+
+    /// If the key-value pair is not present in the map, inserts it and returns
+    /// a mutable reference to the value. If the key-value pair is present,
+    /// returns a mutable reference to the already present value.
+    /// 
     pub fn get_or_insert_with<K, F>(&mut self, key: K, f: F) -> &mut V 
     where
         K: Borrow<str>,
         F: FnOnce() -> V,
     {
         let iter = Encoder::new(key.borrow().bytes());
+        self.trie.get_or_insert_by_iter_with(iter, f)
+    }
+
+    /// If the key-value pair is not present in the map, inserts it and returns
+    /// a mutable reference to the value. If the key-value pair is present,
+    /// returns a mutable reference to the already present value.
+    /// 
+    pub fn get_or_insert_by_iter_with<K, F>(&mut self, key: K, f: F) -> &mut V 
+    where
+        K: Iterator<Item=u8>,
+        F: FnOnce() -> V,
+    {
+        let iter = Encoder::new(key);
         self.trie.get_or_insert_by_iter_with(iter, f)
     }
 
@@ -171,6 +243,17 @@ impl<V> TrieMapBase16<V> {
     /// ```
     pub fn remove(&mut self, key: &str) -> Option<V> {
         self.trie.remove_by_iter(Encoder::new(key.bytes()))
+    }
+
+    /// Removes a key from the map, returning the value at the key if the key
+    /// was previously in the map. If the key was not present in the map,
+    /// `None` is returned.
+    /// 
+    pub fn remove_by_iter<K>(&mut self, key: K) -> Option<V> 
+    where
+        K: Iterator<Item=u8>,
+    {
+        self.trie.remove_by_iter(Encoder::new(key))
     }
 
     /// Returns an iterator over the values of the map. They will be in the 
