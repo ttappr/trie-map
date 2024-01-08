@@ -18,16 +18,41 @@ supports keys composed of the 26 lowercase ASCII characters.
 ``` rust
     use trie_map::TrieMap;
 
-    // RANGE = 26, BASE_CHAR = b'a'.
-    let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+    use std::collections::VecDeque;
+    use std::iter::repeat;
 
-    trie.insert("hello", 1);
+    const WIN_LEN: usize = 20;
 
-    assert_eq!(trie.contains("hello"), true);
+    let input = "ababcdjjjabxzydjjzxyababzbabajjjjj";
+    let words = [("ababcd", 1), ("abxzyd", 2), 
+                 ("bzbaba", 3), ("zxyaba", 4)];
+
+    let mut window = repeat(b'_').take(WIN_LEN).collect::<VecDeque<_>>();
+    let mut count  = 0;
+
+    let trie = words.into_iter().collect::<TrieMap<i32, 28, b'_'>>();
+
+    let k = words[0].0.len();
+
+    for b in input.bytes() {
+        // Determine whether a word is leaving the window.
+        if trie.contains_key_by_iter(window.range(..k).copied()) {
+            count -= 1;
+            println!("{count} words currently in the window.");
+        }
+        window.pop_front();
+        window.push_back(b);
+        
+        // Determine whether a word has just entered the window.
+        if trie.contains_key_by_iter(window.range(WIN_LEN - k..).copied()) {
+            count += 1;
+            println!("{count} words currently in the window.");
+        }
+    }
 ```
 
 Each node of the trie, as configured above, will have a fixed-size descendant 
-array of 26 length, which are indexed into directly by the next character's byte
+array of 28 length, which are indexed into directly by the next character's byte
 value minus `BASE_CHAR`.
 
 The methods of the trie support key types of `String`, `&str`, `&[u8]`, and 
@@ -55,35 +80,16 @@ can be used in other specialized custom tries.
 
 ``` rust
     use trie_map::base16::TrieMapBase16;
-    use std::collections::VecDeque;
-    use std::iter::repeat;
 
-    const WIN_LEN: usize = 20;
+    let mut trie = TrieMapBase16::new();
 
-    let input = "ababcdjjjabxzydjjzxyababzbabajjjjj";
-    let words = [("ababcd", 1), ("abxzyd", 2), 
-                 ("bzbaba", 3), ("zxyaba", 4)];
+    trie.insert("👋", 42);
+    trie.insert("🌍", 43);
 
-    let mut window = repeat(b'_').take(WIN_LEN).collect::<VecDeque<_>>();
-    let mut count  = 0;
+    assert_eq!(trie.get("👋"), Some(&42));
+    assert_eq!(trie.get("🌍"), Some(&43));
 
-    let trie = words.into_iter().collect::<TrieMapBase16<i32>>();
-
-    let k = words[0].0.len();
-
-    for b in input.bytes() {
-        // Determine whether a word is leaving the window.
-        if trie.contains_key_by_iter(window.range(..k).copied()) {
-            count -= 1;
-            println!("{count} words currently in the window.");
-        }
-        window.pop_front();
-        window.push_back(b);
-        
-        // Determine whether a word has just entered the window.
-        if trie.contains_key_by_iter(window.range(WIN_LEN - k..).copied()) {
-            count += 1;
-            println!("{count} words currently in the window.");
-        }
+    for (k1, k2) in trie.keys().zip(["🌍", "👋"].iter()) {
+        assert_eq!(k1, k2.to_string());
     }
 ```
