@@ -1,5 +1,7 @@
 ## TrieMap, A Fast, No-Frills Trie For Rust
 
+See [the documentation](https://ttappr.github.io/trie-map/doc/trie_map/index.html).
+
 This crate offers a very basic implementation for a trie with a focus on the
 speed of insertions and access operations.
 
