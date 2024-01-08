@@ -72,7 +72,7 @@ can be used in other specialized custom tries.
     let k = words[0].0.len();
 
     for b in input.bytes() {
-        // Determine what word is leaving the window.
+        // Determine whether a word is leaving the window.
         if trie.contains_key_by_iter(window.range(..k).copied()) {
             count -= 1;
             println!("{count} words currently in the window.");
