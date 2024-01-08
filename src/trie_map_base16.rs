@@ -11,7 +11,7 @@ use crate::TrieMap;
 /// This is achieved by base 16 encoding the key as it's inserted into the trie.
 /// The encoding is done via an iterator that only encodes the number of bytes
 /// needed to determine if a key is missing or present. So determining a miss
-/// is as fast as possible for operations such as `contains()`.
+/// is as fast as possible for operations such as `contains_key()`.
 ///
 /// Each node has a fixed-size array for 16 successors. And a value of any type
 /// can be inserted with a key. The values are stored in independent contiguous
@@ -74,7 +74,7 @@ impl<V> TrieMapBase16<V> {
     /// assert_eq!(trie.get("Γειά σου"), Some(&1));
     /// assert_eq!(trie.get("κόσμος"), Some(&2));
     /// assert_eq!(trie.get("👋"), Some(&42));
-    /// assert_eq!(trie.get("🌍"), Some(&43));
+    /// assert_eq!(trie.get("🦀"), None);
     ///
     /// ```
     pub fn get(&self, key: &str) -> Option<&V> {
@@ -498,6 +498,22 @@ impl<'a, V> Iterator for ValuesMut<'a, V> {
 impl<'a, V> DoubleEndedIterator for ValuesMut<'a, V> {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.iter.next_back().map(|(_, v)| v)
+    }
+}
+
+impl<V, S> FromIterator<(S, V)> for TrieMapBase16<V> 
+where
+    S: Borrow<str>
+{
+    fn from_iter<T>(iter: T) -> Self
+    where
+        T: IntoIterator<Item = (S, V)>,
+    {
+        let mut trie = Self::new();
+        for (k, v) in iter {
+            trie.insert(k, v);
+        }
+        trie
     }
 }
 
