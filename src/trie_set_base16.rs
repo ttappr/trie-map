@@ -277,4 +277,18 @@ mod tests {
                  s!("μπαρ"), s!("τροφή")]
         );
     }
+
+    #[test]
+    fn len() {
+        let mut set = TrieSetBase16::new();
+        assert_eq!(set.len(), 0);
+        set.insert("foo");
+        assert_eq!(set.len(), 1);
+        set.insert("bar");
+        assert_eq!(set.len(), 2);
+        set.remove("bar");
+        assert_eq!(set.len(), 1);
+        set.remove("foo");
+        assert_eq!(set.len(), 0);
+    }
 }

@@ -30,7 +30,7 @@ impl<V> TrieMapBase16<V> {
 
     /// Returns `true` if the map contains a value for the specified key.
     /// 
-    pub fn contains(&self, key: &str) -> bool {
+    pub fn contains_key(&self, key: &str) -> bool {
         self.trie.get_by_iter(Encoder::new(key.bytes())).is_some()
     }
 
@@ -46,7 +46,7 @@ impl<V> TrieMapBase16<V> {
     /// assert_eq!(trie.contains_by_iter("Γειά σου".bytes()), true);
     /// assert_eq!(trie.contains_by_iter("κόσμος".bytes()), true);
     /// ````
-    pub fn contains_by_iter<K>(&self, key: K) -> bool 
+    pub fn contains_key_by_iter<K>(&self, key: K) -> bool 
     where
         K: Iterator<Item=u8>,
     {
@@ -565,13 +565,13 @@ mod tests {
     #[test]
     fn contains() {
         let mut trie = TrieMapBase16::new();
-        assert_eq!(trie.contains("hello"), false);
+        assert_eq!(trie.contains_key("hello"), false);
         assert_eq!(trie.insert("hello", 1), None);
-        assert_eq!(trie.contains("hello"), true);
-        assert_eq!(trie.contains("world"), false);
+        assert_eq!(trie.contains_key("hello"), true);
+        assert_eq!(trie.contains_key("world"), false);
         assert_eq!(trie.insert("world", 2), None);
-        assert_eq!(trie.contains("world"), true);
-        assert_eq!(trie.contains("hello"), true);
+        assert_eq!(trie.contains_key("world"), true);
+        assert_eq!(trie.contains_key("hello"), true);
     }
 
     #[test]

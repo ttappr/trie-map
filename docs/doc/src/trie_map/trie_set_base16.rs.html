@@ -278,6 +278,20 @@
 <a href="#278" id="278">278</a>
 <a href="#279" id="279">279</a>
 <a href="#280" id="280">280</a>
+<a href="#281" id="281">281</a>
+<a href="#282" id="282">282</a>
+<a href="#283" id="283">283</a>
+<a href="#284" id="284">284</a>
+<a href="#285" id="285">285</a>
+<a href="#286" id="286">286</a>
+<a href="#287" id="287">287</a>
+<a href="#288" id="288">288</a>
+<a href="#289" id="289">289</a>
+<a href="#290" id="290">290</a>
+<a href="#291" id="291">291</a>
+<a href="#292" id="292">292</a>
+<a href="#293" id="293">293</a>
+<a href="#294" id="294">294</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A set implemented as a trie. The keys are strings, which are base 16 
 //! encoded when stored in the trie. Thus there are no strictions on the
 //! range of characters the keys can contain. Each node of the tree has a
@@ -556,5 +570,19 @@
             <span class="macro">vec!</span>[<span class="macro">s!</span>(<span class="string">&quot;bar&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;foo&quot;</span>), 
                  <span class="macro">s!</span>(<span class="string">&quot;μπαρ&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;τροφή&quot;</span>)]
         );
+    }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>len() {
+        <span class="kw">let </span><span class="kw-2">mut </span>set = TrieSetBase16::new();
+        <span class="macro">assert_eq!</span>(set.len(), <span class="number">0</span>);
+        set.insert(<span class="string">&quot;foo&quot;</span>);
+        <span class="macro">assert_eq!</span>(set.len(), <span class="number">1</span>);
+        set.insert(<span class="string">&quot;bar&quot;</span>);
+        <span class="macro">assert_eq!</span>(set.len(), <span class="number">2</span>);
+        set.remove(<span class="string">&quot;bar&quot;</span>);
+        <span class="macro">assert_eq!</span>(set.len(), <span class="number">1</span>);
+        set.remove(<span class="string">&quot;foo&quot;</span>);
+        <span class="macro">assert_eq!</span>(set.len(), <span class="number">0</span>);
     }
 }</code></pre></div></section></main></body></html>

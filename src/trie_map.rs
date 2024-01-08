@@ -121,7 +121,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// assert_eq!(trie.contains("hello"), true);
     /// ```
     ///
-    pub fn contains<K>(&self, key: K) -> bool
+    pub fn contains_key<K>(&self, key: K) -> bool
     where
         K: AsRef<[u8]>,
     {
@@ -695,13 +695,13 @@ mod tests {
         let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
         trie.insert(b"hello", 1);
 
-        assert_eq!(trie.contains(b"hello"), true);
-        assert_eq!(trie.contains(b"world"), false);
+        assert_eq!(trie.contains_key(b"hello"), true);
+        assert_eq!(trie.contains_key(b"world"), false);
 
         trie.insert(b"world", 2);
 
-        assert_eq!(trie.contains(b"hello"), true);
-        assert_eq!(trie.contains(b"world"), true);
+        assert_eq!(trie.contains_key(b"hello"), true);
+        assert_eq!(trie.contains_key(b"world"), true);
     }
 
     #[test]
