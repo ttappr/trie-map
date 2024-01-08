@@ -292,11 +292,11 @@
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
-</pre></div><pre class="rust"><code><span class="doccomment">//! A set implemented as a trie. The keys are strings, which are base 16 
+</pre></div><pre class="rust"><code><span class="doccomment">//! A set implemented as a trie. The keys are strings, which are base 16
 //! encoded when stored in the trie. Thus there are no strictions on the
 //! range of characters the keys can contain. Each node of the tree has a
 //! fixed-size array to its successors (order/branching-factor of 16).
-//! 
+//!
 
 </span><span class="kw">use </span>std::borrow::Borrow;
 <span class="kw">use </span>std::fmt;
@@ -305,20 +305,20 @@
 <span class="kw">use </span><span class="kw">crate</span>::trie_map_base16::{Encoder, decode};
 
 <span class="doccomment">/// A set implemented as a trie that encodes its keys as base 16 bytes.
-/// 
+///
 </span><span class="kw">pub struct </span>TrieSetBase16 {
     trie: TrieMap&lt;(), <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
 <span class="kw">impl </span>TrieSetBase16 {
     <span class="doccomment">/// Creates a new empty TrieSet.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ trie: TrieMap::new() }
     }
 
     <span class="doccomment">/// Removes all elements from the set.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.trie.clear();
     }
@@ -326,22 +326,22 @@
     <span class="doccomment">/// Reports whether the set contains the given key.
     /// ```
     /// use trie_map::base16::TrieSetBase16;
-    /// 
+    ///
     /// let mut set = TrieSetBase16::new();
-    /// 
+    ///
     /// assert!(set.insert(&quot;hello&quot;));
-    /// 
+    ///
     /// assert!(!set.contains(&quot;world&quot;));
     /// assert!(set.contains(&quot;hello&quot;));
     /// ```
-    /// 
+    ///
     </span><span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; bool {
         <span class="self">self</span>.trie.contains_by_iter(Encoder::new(key.bytes()))
     }
 
     <span class="doccomment">/// Reports whether the set contains the given key. The key is given as an
     /// iterator.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>contains_by_iter&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, iter: K) -&gt; bool
     <span class="kw">where
         </span>K: Iterator&lt;Item = u8&gt;,
@@ -351,8 +351,8 @@
 
     <span class="doccomment">/// Inserts the given key into the set. Returns true if the key was not
     /// already present.
-    /// 
-    </span><span class="kw">pub fn </span>insert&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool 
+    ///
+    </span><span class="kw">pub fn </span>insert&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool
     <span class="kw">where
         </span>K: Borrow&lt;str&gt;,
     {
@@ -362,7 +362,7 @@
 
     <span class="doccomment">/// Inserts the given key into the set. Returns true if the key was not
     /// already present.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>insert_by_iter&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iter: K) -&gt; bool
     <span class="kw">where
         </span>K: Iterator&lt;Item = u8&gt;,
@@ -371,32 +371,32 @@
     }
 
     <span class="doccomment">/// Reports whether the set is empty.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.trie.is_empty()
     }
 
     <span class="doccomment">/// Returns an iterator over the set.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter {
         Iter { iter: <span class="self">self</span>.trie.iter() }
     }
 
     <span class="doccomment">/// Returns an iterator over the set.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.trie.len()
     }
 
     <span class="doccomment">/// Removes the given key from the set. Returns true if the key was present.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>remove(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; bool {
         <span class="self">self</span>.trie.remove_by_iter(Encoder::new(key.bytes())).is_some()
     }
-    
+
     <span class="doccomment">/// Removes the given key from the set. Returns true if the key was present.
     /// The key is given as an iterator.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>remove_by_iter&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, iter: K) -&gt; bool
     <span class="kw">where
         </span>K: Iterator&lt;Item = u8&gt;,
@@ -412,7 +412,7 @@
 }
 
 <span class="doccomment">/// An iterator over the elements of a TrieSet.
-/// 
+///
 </span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
     iter: <span class="kw">crate</span>::iterators::Iter&lt;<span class="lifetime">&#39;a</span>, (), <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
@@ -441,7 +441,7 @@
 }
 
 <span class="doccomment">/// An owning iterator over the elements of a TrieSet.
-/// 
+///
 </span><span class="kw">pub struct </span>IntoIter {
     iter: <span class="kw">crate</span>::iterators::IntoIter&lt;(), <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
@@ -547,7 +547,7 @@
         set.remove(<span class="string">&quot;foo&quot;</span>);
         <span class="macro">assert!</span>(set.is_empty());
     }
-    
+
     <span class="attr">#[test]
     </span><span class="kw">fn </span>iter() {
         <span class="kw">let </span><span class="kw-2">mut </span>set = TrieSetBase16::new();
@@ -557,17 +557,17 @@
         set.insert(<span class="string">&quot;μπαρ&quot;</span>);
         <span class="macro">assert_eq!</span>(
             set.iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
-            <span class="macro">vec!</span>[<span class="macro">s!</span>(<span class="string">&quot;bar&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;foo&quot;</span>), 
+            <span class="macro">vec!</span>[<span class="macro">s!</span>(<span class="string">&quot;bar&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;foo&quot;</span>),
                  <span class="macro">s!</span>(<span class="string">&quot;μπαρ&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;τροφή&quot;</span>)]
         );
         <span class="macro">assert_eq!</span>(
             set.iter().rev().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
-            <span class="macro">vec!</span>[<span class="macro">s!</span>(<span class="string">&quot;τροφή&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;μπαρ&quot;</span>), 
+            <span class="macro">vec!</span>[<span class="macro">s!</span>(<span class="string">&quot;τροφή&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;μπαρ&quot;</span>),
                  <span class="macro">s!</span>(<span class="string">&quot;foo&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;bar&quot;</span>)]
         );
         <span class="macro">assert_eq!</span>(
             set.into_iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
-            <span class="macro">vec!</span>[<span class="macro">s!</span>(<span class="string">&quot;bar&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;foo&quot;</span>), 
+            <span class="macro">vec!</span>[<span class="macro">s!</span>(<span class="string">&quot;bar&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;foo&quot;</span>),
                  <span class="macro">s!</span>(<span class="string">&quot;μπαρ&quot;</span>), <span class="macro">s!</span>(<span class="string">&quot;τροφή&quot;</span>)]
         );
     }

@@ -4,11 +4,11 @@
 </div></details><details class="toggle method-toggle" open><summary><section id="method.contains" class="method"><a class="src rightside" href="../../src/trie_map/trie_set_base16.rs.html#44-46">source</a><h4 class="code-header">pub fn <a href="#method.contains" class="fn">contains</a>(&amp;self, key: &amp;<a class="primitive" href="https://doc.rust-lang.org/1.75.0/std/primitive.str.html">str</a>) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.75.0/std/primitive.bool.html">bool</a></h4></section></summary><div class="docblock"><p>Reports whether the set contains the given key.</p>
 
 <div class="example-wrap"><pre class="rust rust-example-rendered"><code><span class="kw">use </span>trie_map::base16::TrieSetBase16;
- 
+
 <span class="kw">let </span><span class="kw-2">mut </span>set = TrieSetBase16::new();
- 
+
 <span class="macro">assert!</span>(set.insert(<span class="string">&quot;hello&quot;</span>));
- 
+
 <span class="macro">assert!</span>(!set.contains(<span class="string">&quot;world&quot;</span>));
 <span class="macro">assert!</span>(set.contains(<span class="string">&quot;hello&quot;</span>));</code></pre></div>
 </div></details><details class="toggle method-toggle" open><summary><section id="method.contains_by_iter" class="method"><a class="src rightside" href="../../src/trie_map/trie_set_base16.rs.html#51-56">source</a><h4 class="code-header">pub fn <a href="#method.contains_by_iter" class="fn">contains_by_iter</a>&lt;K&gt;(&amp;self, iter: K) -&gt; <a class="primitive" href="https://doc.rust-lang.org/1.75.0/std/primitive.bool.html">bool</a><span class="where fmt-newline">where

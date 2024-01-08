@@ -259,8 +259,17 @@
 <a href="#259" id="259">259</a>
 <a href="#260" id="260">260</a>
 <a href="#261" id="261">261</a>
+<a href="#262" id="262">262</a>
+<a href="#263" id="263">263</a>
+<a href="#264" id="264">264</a>
+<a href="#265" id="265">265</a>
+<a href="#266" id="266">266</a>
+<a href="#267" id="267">267</a>
+<a href="#268" id="268">268</a>
+<a href="#269" id="269">269</a>
+<a href="#270" id="270">270</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A set implemented using TrieMap.
-//! 
+//!
 
 </span><span class="kw">use </span>std::fmt;
 
@@ -270,20 +279,20 @@
 <span class="doccomment">/// A set implemented using TrieMap. Internally this is a TrieMap with a unit
 /// type as the value. This is a convenience type for when you want to use a
 /// TrieMap as a set.
-/// 
+///
 </span><span class="kw">pub struct </span>TrieSet&lt;<span class="kw">const </span>R: usize, <span class="kw">const </span>B: u8&gt; {
     trie: TrieMap&lt;(), R, B&gt;
 }
 
 <span class="kw">impl</span>&lt;<span class="kw">const </span>R: usize, <span class="kw">const </span>B: u8&gt; TrieSet&lt;R, B&gt; {
     <span class="doccomment">/// Creates a new empty TrieSet.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>new() -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ trie: TrieMap::new() }
     }
 
     <span class="doccomment">/// Removes all elements from the set.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>clear(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="self">self</span>.trie.clear();
     }
@@ -291,14 +300,17 @@
     <span class="doccomment">/// Reports whether the set contains the given key.
     /// ```
     /// use trie_map::TrieSet;
-    /// 
+    ///
     /// let mut set = TrieSet::&lt;26, b&#39;a&#39;&gt;::new();
-    /// 
+    ///
     /// assert!(set.insert(&quot;hello&quot;));
     /// assert!(set.contains(&quot;hello&quot;));
     /// assert!(!set.contains(&quot;world&quot;));
     /// ````
-    </span><span class="kw">pub fn </span>contains&lt;K: AsRef&lt;[u8]&gt;&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; bool {
+    </span><span class="kw">pub fn </span>contains&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; bool 
+    <span class="kw">where
+        </span>K: AsRef&lt;[u8]&gt;
+    {
         <span class="self">self</span>.trie.get(key).is_some()
     }
 
@@ -306,14 +318,14 @@
     /// iterator.
     /// ```
     /// use trie_map::TrieSet;
-    /// 
+    ///
     /// let mut set = TrieSet::&lt;26, b&#39;a&#39;&gt;::new();
-    /// 
+    ///
     /// assert!(set.insert(&quot;hello&quot;));
     /// assert!(set.contains_by_iter(&quot;hello&quot;.bytes()));
     /// assert!(!set.contains_by_iter(&quot;world&quot;.bytes()));
     /// ```
-    </span><span class="kw">pub fn </span>contains_by_iter&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; bool 
+    </span><span class="kw">pub fn </span>contains_by_iter&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; bool
     <span class="kw">where
         </span>K: Iterator&lt;Item = u8&gt;
     {
@@ -324,21 +336,24 @@
     /// already present.
     /// ```
     /// use trie_map::TrieSet;
-    /// 
+    ///
     /// let mut set = TrieSet::&lt;26, b&#39;a&#39;&gt;::new();
-    /// 
+    ///
     /// assert!(set.insert(&quot;hello&quot;));
     /// assert!(!set.insert(&quot;hello&quot;));
     /// assert!(set.insert(&quot;world&quot;));
     /// ````
-    </span><span class="kw">pub fn </span>insert&lt;K: AsRef&lt;[u8]&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool {
+    </span><span class="kw">pub fn </span>insert&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool 
+    <span class="kw">where
+        </span>K: AsRef&lt;[u8]&gt;
+    {
         <span class="self">self</span>.trie.insert(key, ()).is_none()
     }
 
     <span class="doccomment">/// Inserts the given key into the set. Returns true if the key was not
     /// already present. The key is given as an iterator.
-    /// 
-    </span><span class="kw">pub fn </span>insert_by_iter&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool 
+    ///
+    </span><span class="kw">pub fn </span>insert_by_iter&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool
     <span class="kw">where
         </span>K: Iterator&lt;Item = u8&gt;
     {
@@ -346,26 +361,29 @@
     }
 
     <span class="doccomment">/// Returns true if the set contains no elements.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>is_empty(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; bool {
         <span class="self">self</span>.trie.is_empty()
     }
 
     <span class="doccomment">/// Returns an iterator over the keys of the set.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>iter(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; Iter&lt;R, B&gt; {
         <span class="self">self</span>.into_iter()
     }
 
     <span class="doccomment">/// Returns the number of elements in the set.
-    /// 
+    ///
     </span><span class="kw">pub fn </span>len(<span class="kw-2">&amp;</span><span class="self">self</span>) -&gt; usize {
         <span class="self">self</span>.trie.len()
     }
 
     <span class="doccomment">/// Removes the given key from the set. Returns true if the key was present.
-    /// 
-    </span><span class="kw">pub fn </span>remove&lt;K: AsRef&lt;[u8]&gt;&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool {
+    ///
+    </span><span class="kw">pub fn </span>remove&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool 
+    <span class="kw">where
+        </span>K: AsRef&lt;[u8]&gt;
+    {
         <span class="self">self</span>.trie.remove(key).is_some()
     }
 
@@ -373,14 +391,14 @@
     /// The key is given as an iterator.
     /// ```
     /// use trie_map::TrieSet;
-    /// 
+    ///
     /// let mut set = TrieSet::&lt;26, b&#39;a&#39;&gt;::new();
-    /// 
+    ///
     /// assert!(set.insert(&quot;hello&quot;));
     /// assert!(set.remove_by_iter(&quot;hello&quot;.bytes()));
     /// assert!(!set.remove_by_iter(&quot;hello&quot;.bytes()));
     /// ```
-    </span><span class="kw">pub fn </span>remove_by_iter&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool 
+    </span><span class="kw">pub fn </span>remove_by_iter&lt;K&gt;(<span class="kw-2">&amp;mut </span><span class="self">self</span>, key: K) -&gt; bool
     <span class="kw">where
         </span>K: Iterator&lt;Item = u8&gt;
     {
@@ -488,7 +506,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>set = TrieSet::&lt;<span class="number">26</span>, <span class="string">b&#39;a&#39;</span>&gt;::new();
         <span class="macro">assert!</span>(set.insert(<span class="string">&quot;hello&quot;</span>));
         <span class="macro">assert!</span>(set.insert(<span class="string">&quot;world&quot;</span>));
-        <span class="macro">assert_eq!</span>(set.iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(), 
+        <span class="macro">assert_eq!</span>(set.iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
                    <span class="macro">vec!</span>[bx(<span class="string">&quot;hello&quot;</span>), bx(<span class="string">&quot;world&quot;</span>)]);
     }
 
@@ -497,7 +515,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>set = TrieSet::&lt;<span class="number">26</span>, <span class="string">b&#39;a&#39;</span>&gt;::new();
         <span class="macro">assert!</span>(set.insert(<span class="string">&quot;hello&quot;</span>));
         <span class="macro">assert!</span>(set.insert(<span class="string">&quot;world&quot;</span>));
-        <span class="macro">assert_eq!</span>(set.iter().rev().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(), 
+        <span class="macro">assert_eq!</span>(set.iter().rev().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
                    <span class="macro">vec!</span>[bx(<span class="string">&quot;world&quot;</span>), bx(<span class="string">&quot;hello&quot;</span>)]);
     }
 
@@ -506,7 +524,7 @@
         <span class="kw">let </span><span class="kw-2">mut </span>set = TrieSet::&lt;<span class="number">26</span>, <span class="string">b&#39;a&#39;</span>&gt;::new();
         <span class="macro">assert!</span>(set.insert(<span class="string">&quot;hello&quot;</span>));
         <span class="macro">assert!</span>(set.insert(<span class="string">&quot;world&quot;</span>));
-        <span class="macro">assert_eq!</span>(set.into_iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(), 
+        <span class="macro">assert_eq!</span>(set.into_iter().collect::&lt;Vec&lt;<span class="kw">_</span>&gt;&gt;(),
                    <span class="macro">vec!</span>[bx(<span class="string">&quot;hello&quot;</span>), bx(<span class="string">&quot;world&quot;</span>)]);
     }
 
@@ -515,8 +533,8 @@
         <span class="kw">let </span><span class="kw-2">mut </span>set = TrieSet::&lt;<span class="number">26</span>, <span class="string">b&#39;a&#39;</span>&gt;::new();
         <span class="macro">assert!</span>(set.insert(<span class="string">&quot;hello&quot;</span>));
         <span class="macro">assert!</span>(set.insert(<span class="string">&quot;world&quot;</span>));
-        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, set), 
-                   <span class="string">r#&quot;{[104, 101, 108, 108, 111], &quot;#</span>.to_owned() 
+        <span class="macro">assert_eq!</span>(<span class="macro">format!</span>(<span class="string">&quot;{:?}&quot;</span>, set),
+                   <span class="string">r#&quot;{[104, 101, 108, 108, 111], &quot;#</span>.to_owned()
                    + <span class="string">r#&quot;[119, 111, 114, 108, 100]}&quot;#</span>);
     }
 }</code></pre></div></section></main></body></html>
