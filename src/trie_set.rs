@@ -59,7 +59,7 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
     where
         K: Iterator<Item = u8>
     {
-        self.trie.contains_by_iter(key)
+        self.trie.contains_key_by_iter(key)
     }
 
     /// Inserts the given key into the set. Returns true if the key was not
