@@ -43,8 +43,8 @@ impl<V> TrieMapBase16<V> {
     /// trie.insert("Γειά σου", 1);
     /// trie.insert("κόσμος", 2);
     /// 
-    /// assert_eq!(trie.contains_by_iter("Γειά σου".bytes()), true);
-    /// assert_eq!(trie.contains_by_iter("κόσμος".bytes()), true);
+    /// assert_eq!(trie.contains_key_by_iter("Γειά σου".bytes()), true);
+    /// assert_eq!(trie.contains_key_by_iter("κόσμος".bytes()), true);
     /// ````
     pub fn contains_key_by_iter<K>(&self, key: K) -> bool 
     where

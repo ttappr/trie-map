@@ -118,7 +118,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// trie.insert("hello", 1);
     ///
-    /// assert_eq!(trie.contains("hello"), true);
+    /// assert_eq!(trie.contains_key("hello"), true);
     /// ```
     ///
     pub fn contains_key<K>(&self, key: K) -> bool
