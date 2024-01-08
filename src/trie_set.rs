@@ -84,6 +84,12 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
         self.trie.insert_by_iter(key, ()).is_none()
     }
 
+    /// Returns true if the set contains no elements.
+    /// 
+    pub fn is_empty(&self) -> bool {
+        self.trie.is_empty()
+    }
+
     /// Returns an iterator over the keys of the set.
     /// 
     pub fn iter(&self) -> Iter<R, B> {
@@ -94,12 +100,6 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
     /// 
     pub fn len(&self) -> usize {
         self.trie.len()
-    }
-
-    /// Returns true if the set contains no elements.
-    /// 
-    pub fn is_empty(&self) -> bool {
-        self.trie.is_empty()
     }
 
     /// Removes the given key from the set. Returns true if the key was present.

@@ -36,7 +36,7 @@ impl<V> TrieMapBase16<V> {
 
     /// Returns `true` if the map contains a value for the specified key.
     /// ```
-    /// use trie_map::trie_map_base16::TrieMapBase16;
+    /// use trie_map::base16::TrieMapBase16;
     /// 
     /// let mut trie = TrieMapBase16::new();
     /// 
@@ -56,7 +56,7 @@ impl<V> TrieMapBase16<V> {
     /// Returns a reference to the value corresponding to the key, or `None` if
     /// the key is not present in the map.
     /// ```
-    /// use trie_map::trie_map_base16::TrieMapBase16;
+    /// use trie_map::base16::TrieMapBase16;
     /// 
     /// let mut trie = TrieMapBase16::new();
     /// 
@@ -78,7 +78,7 @@ impl<V> TrieMapBase16<V> {
     /// Returns a reference to the value corresponding to the key, or `None` if
     /// the key is not present in the map.
     /// ```
-    /// use trie_map::trie_map_base16::TrieMapBase16;
+    /// use trie_map::base16::TrieMapBase16;
     /// 
     /// let mut trie = TrieMapBase16::new();
     /// 
@@ -114,7 +114,7 @@ impl<V> TrieMapBase16<V> {
     /// a mutable reference to the value. If the key-value pair is present,
     /// returns a mutable reference to the already present value.
     /// ```
-    /// use trie_map::trie_map_base16::TrieMapBase16;
+    /// use trie_map::base16::TrieMapBase16;
     /// 
     /// let mut trie = TrieMapBase16::new();
     /// 
@@ -201,7 +201,7 @@ impl<V> TrieMapBase16<V> {
 
     /// Returns an iterator over the keys of the map in canonical order.
     /// ```
-    /// use trie_map::trie_map_base16::TrieMapBase16;
+    /// use trie_map::base16::TrieMapBase16;
     /// 
     /// let mut trie = TrieMapBase16::new();
     /// 
@@ -231,7 +231,7 @@ impl<V> TrieMapBase16<V> {
     /// was previously in the map. If the key was not present in the map,
     /// `None` is returned.
     /// ```
-    /// use trie_map::trie_map_base16::TrieMapBase16;
+    /// use trie_map::base16::TrieMapBase16;
     /// 
     /// let mut trie = TrieMapBase16::new();
     /// 
