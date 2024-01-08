@@ -125,7 +125,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     where
         K: AsRef<[u8]>,
     {
-        self.contains_by_iter(key.as_ref().into_iter().copied())
+        self.contains_key_by_iter(key.as_ref().into_iter().copied())
     }
 
     /// Returns `true` if the trie contains a value at the given key, otherwise
@@ -145,9 +145,9 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// window.pop_front();
     /// window.push_back(b'o');
     ///
-    /// assert_eq!(trie.contains_by_iter(window.range(0..5).copied()), true);
+    /// assert_eq!(trie.contains_key_by_iter(window.range(0..5).copied()), true);
     /// ```
-    pub fn contains_by_iter<K>(&self, key: K) -> bool
+    pub fn contains_key_by_iter<K>(&self, key: K) -> bool
     where
         K: Iterator<Item = u8>,
     {
