@@ -20,7 +20,7 @@
 
 use std::fmt;
 
-use crate::iterators::{Iter, IterMut, Keys, Values};
+use crate::iterators::{Iter, IterMut, Keys, Values, ValuesMut};
 
 pub(crate) const ROOT_HANDLE: NodeHandle = NodeHandle(0);
 
@@ -100,7 +100,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     }
 
     /// Clears the trie, removing all values.
-    /// 
+    ///
     pub fn clear(&mut self) {
         self.nodes.clear();
         self.values.clear();
@@ -135,21 +135,21 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// ```
     /// use trie_map::TrieMap;
     /// use std::collections::VecDeque;
-    /// 
+    ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
-    /// 
+    ///
     /// trie.insert(b"hello", 1);
-    /// 
+    ///
     /// let mut window = b"hhell".iter().copied().collect::<VecDeque<_>>();
-    /// 
+    ///
     /// window.pop_front();
     /// window.push_back(b'o');
-    /// 
+    ///
     /// assert_eq!(trie.contains_by_iter(window.range(0..5).copied()), true);
     /// ```
     pub fn contains_by_iter<K>(&self, key: K) -> bool
     where
-        K: Iterator<Item=u8>,
+        K: Iterator<Item = u8>,
     {
         let mut key   = key;
         let mut hcurr = self.root;
@@ -201,10 +201,10 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// window.push_back(b'o');
     ///
     /// assert_eq!(trie.get_by_iter(window.range(0..5).copied()), Some(&1));
-    /// ````
+    /// ```
     pub fn get_by_iter<K>(&self, key: K) -> Option<&V>
     where
-        K: Iterator<Item=u8>,
+        K: Iterator<Item = u8>,
     {
         let mut key   = key;
         let mut hcurr = self.root;
@@ -254,16 +254,16 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
     /// trie.insert(b"hello", 1);
-    /// 
+    ///
     /// let iter = b"hel".iter().chain(b"lo").copied();
-    /// 
+    ///
     /// *trie.get_mut_by_iter(iter).unwrap() = 17;
-    /// 
+    ///
     /// assert_eq!(trie.get(b"hello"), Some(&17));
     /// ```
     pub fn get_mut_by_iter<K>(&mut self, key: K) -> Option<&mut V>
     where
-        K: Iterator<Item=u8>,
+        K: Iterator<Item = u8>,
     {
         let mut key   = key;
         let mut hcurr = self.root;
@@ -318,7 +318,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// ```
     pub fn get_or_insert_by_iter<K>(&mut self, key: K, value: V) -> &mut V
     where
-        K: Iterator<Item=u8>,
+        K: Iterator<Item = u8>,
     {
         self.get_or_insert_by_iter_with(key, ||value)
     }
@@ -362,11 +362,12 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     pub fn get_or_insert_by_iter_with<K, F>(&mut self, key: K, f: F)
         -> &mut V
     where
-        K: Iterator<Item=u8>,
+        K: Iterator<Item = u8>,
         F: FnOnce() -> V,
     {
         let mut key   = key;
         let mut hcurr = self.root;
+        let mut newkey = false;
         while let Some(b) = key.next() {
             debug_assert!(b >= BASE_CHAR && b < BASE_CHAR + RANGE as u8);
             let ichild = (b - BASE_CHAR) as usize;
@@ -378,6 +379,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
                 curr.child[ichild] = Some(hnew);
                 curr.len += 1;
                 hcurr = hnew;
+                newkey = true;
             }
         }
         let hvalue = {
@@ -389,6 +391,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
                 hvalue
             }
         };
+        if newkey { self.len += 1; }
         self.values[hvalue.0].as_mut().unwrap()
     }
 
@@ -419,7 +422,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     pub fn insert_by_iter<K>(&mut self, key: K, value: V) -> Option<V>
     where
-        K: Iterator<Item=u8>,
+        K: Iterator<Item = u8>,
     {
         let mut key    = key;
         let mut hcurr  = self.root;
@@ -446,6 +449,23 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         self.hderef_mut(hcurr).value = Some(hvalue);
         if newkey { self.len += 1; }
         retval
+    }
+
+    /// Returns `true` if the trie contains no values, otherwise `false` is
+    /// returned.
+    /// ```
+    /// use trie_map::TrieMap;
+    ///
+    /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::with_capacity(10);
+    ///
+    /// assert_eq!(trie.is_empty(), true);
+    ///
+    /// trie.insert("hello", 1);
+    ///
+    /// assert_eq!(trie.is_empty(), false);
+    /// ```
+    pub fn is_empty(&self) -> bool {
+        self.len == 0
     }
 
     /// Returns an iterator over the key-value pairs in the trie.
@@ -516,23 +536,6 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         self.len
     }
 
-    /// Returns `true` if the trie contains no values, otherwise `false` is
-    /// returned.
-    /// ```
-    /// use trie_map::TrieMap;
-    /// 
-    /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::with_capacity(10);
-    /// 
-    /// assert_eq!(trie.is_empty(), true);
-    /// 
-    /// trie.insert("hello", 1);
-    /// 
-    /// assert_eq!(trie.is_empty(), false);
-    /// ```
-    pub fn is_empty(&self) -> bool {
-        self.len == 0
-    }
-
     /// Removes a value from the trie at the given key, if it exists, and
     /// returns it, otherwise `None` is returned.
     ///
@@ -558,7 +561,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// ```
     pub fn remove_by_iter<K>(&mut self, key: K) -> Option<V>
     where
-        K: Iterator<Item=u8>,
+        K: Iterator<Item = u8>,
     {
         let mut key   = key;
         let mut hcurr = self.root;
@@ -610,6 +613,20 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// ```
     pub fn values(&self) -> Values<V, RANGE, BASE_CHAR> {
         Values::new(self)
+    }
+
+    /// Returns an iterator over the values in the trie.
+    /// ```
+    /// use trie_map::TrieMap;
+    /// 
+    /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+    /// 
+    /// trie.insert(b"hello", 1);
+    /// 
+    /// assert_eq!(trie.values_mut().next(), Some(&mut 1));
+    /// ```
+    pub fn values_mut(&mut self) -> ValuesMut<V, RANGE, BASE_CHAR> {
+        ValuesMut::new(self)
     }
 
     /// Used internally to create a new node and return a handle to it.
@@ -664,8 +681,8 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     /// Used internally to dereference a node handle mutably.
     ///
     #[inline(always)]
-    pub(crate) fn hderef_mut(&mut self, handle: NodeHandle) 
-        -> &mut Node<RANGE> 
+    pub(crate) fn hderef_mut(&mut self, handle: NodeHandle)
+        -> &mut Node<RANGE>
     {
         &mut self.nodes[handle.0]
     }
@@ -839,13 +856,47 @@ mod tests {
     }
 
     #[test]
+    fn values_mut() {
+        let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+
+        let mut data = [(b"hello", 1), (b"world", 2)];
+
+        for (key, val) in &data {
+            trie.insert(key, *val);
+        }
+        let iter = trie.values_mut().zip(data.iter_mut().map(|(_, v)| v));
+
+        for (val1, val2) in iter {
+            assert_eq!(val1, val2);
+            *val1 += 17;
+            *val2 += 17;
+        }
+        for (&val1, &val2) in trie.values().zip(data.iter().map(|(_, v)| v)) {
+            assert_eq!(val1, val2);
+        }
+
+        let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+
+        let data = [("hello", 1), ("hellowalterjack", 2), ("world", 3)];
+
+        for &(key, val) in &data {
+            trie.insert(key, val);
+        }
+        let iter = trie.values_mut().zip(data.iter().map(|(_, v)| v));
+
+        for (val1, val2) in iter {
+            assert_eq!(val1, val2);
+        }
+    }
+
+    #[test]
     fn fmt_debug() {
         let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
 
         trie.insert(b"hello", 1);
         trie.insert(b"world", 2);
 
-        assert_eq!(format!("{:?}", trie), 
+        assert_eq!(format!("{:?}", trie),
                            r#"{[104, 101, 108, 108, 111]: 1, "#.to_owned()
                            + r#"[119, 111, 114, 108, 100]: 2}"#);
     }

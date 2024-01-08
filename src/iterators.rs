@@ -1,10 +1,10 @@
 //! # Iterators, The Iterators Used in TrieMap
-//! 
+//!
 //! Each iterator implements the InnerIter trait, which provides the traversal
 //! algorithms. The iterators perform a traversal of the trie, advancing through
-//! its nodes on each call to next() or next_back(). No intermediate 
+//! its nodes on each call to next() or next_back(). No intermediate
 //! representation is used to store keys or values.
-//! 
+//!
 
 use crate::trie_map::*;
 
@@ -13,33 +13,33 @@ use crate::trie_map::*;
 /// a stack and key vector. The Iterator and DoubleEndedIterator traits are
 /// implemented by the iterators themselves, which only call the traversal
 /// algorithms of this trait.
-/// 
+///
 trait IterBase<V, const R: usize, const B: u8> {
     type Item;
 
     /// Returns a stack used to track where in the trie the iterator is.
-    /// 
+    ///
     fn stack(&mut self) -> &mut Vec<(NodeHandle, usize, bool)>;
-    
+
     /// Returns a vector used to assemble the keys during traversal.
-    /// 
+    ///
     fn key(&mut self) -> &mut Vec<u8>;
-    
+
     /// Invokes the iterator's trie's hderef method.
-    /// 
+    ///
     fn hderef(&self, handle: NodeHandle) -> &Node<R>;
 
     /// Invoked on the iterator to get it to produce the next iterator item.
-    /// 
-    fn item(&mut self, 
+    ///
+    fn item(&mut self,
             hcurr : NodeHandle,
             hval  : ValueHandle,
             key   : Box<[u8]>  ) -> Option<Self::Item>;
 
     /// The core of the traversal algorithm. This method is invoked by the
-    /// iterator's next method. Each iterator implements Iterator and its 
+    /// iterator's next method. Each iterator implements Iterator and its
     /// next() method which onlly calls this method.
-    /// 
+    ///
     fn base_next(&mut self) -> Option<Self::Item> {
         if self.stack().is_empty() {
             self.stack().push((ROOT_HANDLE, 0, true))
@@ -67,11 +67,11 @@ trait IterBase<V, const R: usize, const B: u8> {
         None
     }
 
-    /// The core of the reverse traversal algorithm. This method is invoked by 
-    /// the iterator's next_back method. Each iterator implements 
-    /// DoubleEndedIterator and its next_back() method which onlly calls this 
+    /// The core of the reverse traversal algorithm. This method is invoked by
+    /// the iterator's next_back method. Each iterator implements
+    /// DoubleEndedIterator and its next_back() method which onlly calls this
     /// method.
-    /// 
+    ///
     fn base_next_back(&mut self) -> Option<Self::Item> {
         if self.stack().is_empty() {
             self.stack().push((ROOT_HANDLE, R + 1, false));
@@ -101,7 +101,7 @@ trait IterBase<V, const R: usize, const B: u8> {
 }
 
 /// A consuming iterator over the key-value pairs of a `TrieMap`.
-/// 
+///
 pub struct IntoIter<V, const R: usize, const B: u8> {
     trie  : TrieMap<V, R, B>,
     key   : Vec<u8>,
@@ -129,7 +129,7 @@ impl<V, const R: usize, const B: u8> IterBase<V, R, B> for IntoIter<V, R, B> {
         self.trie.hderef(handle)
     }
     #[inline]
-    fn item(&mut self, 
+    fn item(&mut self,
             hcurr : NodeHandle,
             hval  : ValueHandle,
             key   : Box<[u8]>  ) -> Option<Self::Item> {
@@ -161,9 +161,9 @@ impl<V, const R: usize, const B: u8> IntoIterator for TrieMap<V, R, B> {
     }
 }
 
-/// An iterator over the key-value pairs of a `TrieMap` that holds an 
+/// An iterator over the key-value pairs of a `TrieMap` that holds an
 /// immutable reference to the trie.
-/// 
+///
 pub struct Iter<'a, V, const R: usize, const B: u8> {
     trie  : &'a TrieMap<V, R, B>,
     key   : Vec<u8>,
@@ -175,8 +175,8 @@ impl<'a, V, const R: usize, const B: u8> Iter<'a, V, R, B> {
     }
 }
 
-impl<'a, V, const R: usize, const B: u8> 
-    IterBase<V, R, B> for Iter<'a, V, R, B> 
+impl<'a, V, const R: usize, const B: u8>
+    IterBase<V, R, B> for Iter<'a, V, R, B>
 {
     type Item = (Box<[u8]>, &'a V);
 
@@ -193,7 +193,7 @@ impl<'a, V, const R: usize, const B: u8>
         self.trie.hderef(handle)
     }
     #[inline]
-    fn item(&mut self, 
+    fn item(&mut self,
             _hcurr : NodeHandle,
             hval   : ValueHandle,
             key    : Box<[u8]>  ) -> Option<Self::Item> {
@@ -229,7 +229,7 @@ impl<'a, V, const R: usize, const B: u8> IntoIterator for &'a TrieMap<V, R, B> {
 
 /// An iterator over the key-value pairs of a `TrieMap` that holds a mutable
 /// reference to the trie. It produces items that can be modified by the caller.
-/// 
+///
 pub struct IterMut<'a, V, const R: usize, const B: u8> {
     trie  : &'a mut TrieMap<V, R, B>,
     key   : Vec<u8>,
@@ -242,8 +242,8 @@ impl<'a, V, const R: usize, const B: u8> IterMut<'a, V, R, B> {
     }
 }
 
-impl<'a, V, const R: usize, const B: u8> 
-    IterBase<V, R, B> for IterMut<'a, V, R, B> 
+impl<'a, V, const R: usize, const B: u8>
+    IterBase<V, R, B> for IterMut<'a, V, R, B>
 {
     type Item = (Box<[u8]>, &'a mut V);
 
@@ -260,7 +260,7 @@ impl<'a, V, const R: usize, const B: u8>
         self.trie.hderef(handle)
     }
     #[inline]
-    fn item<'b>(&'b mut self, 
+    fn item<'b>(&'b mut self,
                 _hcurr : NodeHandle,
                 hval   : ValueHandle,
                 key    : Box<[u8]>  ) -> Option<Self::Item> {
@@ -301,7 +301,7 @@ impl <'a, V, const R: usize, const B: u8> IntoIterator
 
 /// An iterator over the keys of a `TrieMap` that holds an immutable reference
 /// to the trie.
-/// 
+///
 pub struct Keys<'a, V, const R: usize, const B: u8> {
     iter: Iter<'a, V, R, B>,
 }
@@ -320,8 +320,8 @@ impl<'a, V, const R: usize, const B: u8> Iterator for Keys<'a, V, R, B> {
     }
 }
 
-impl<'a, V, const R: usize, const B: u8> 
-    DoubleEndedIterator for Keys<'a, V, R, B> 
+impl<'a, V, const R: usize, const B: u8>
+    DoubleEndedIterator for Keys<'a, V, R, B>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.iter.next_back().map(|(key, _)| key)
@@ -330,7 +330,7 @@ impl<'a, V, const R: usize, const B: u8>
 
 /// An iterator over the values of a `TrieMap` that holds an immutable reference
 /// to the trie.
-/// 
+///
 pub struct Values<'a, V, const R: usize, const B: u8> {
     iter: Iter<'a, V, R, B>,
 }
@@ -349,16 +349,42 @@ impl<'a, V, const R: usize, const B: u8> Iterator for Values<'a, V, R, B> {
     }
 }
 
-impl<'a, V, const R: usize, const B: u8> 
-    DoubleEndedIterator for Values<'a, V, R, B> 
+impl<'a, V, const R: usize, const B: u8>
+    DoubleEndedIterator for Values<'a, V, R, B>
 {
     fn next_back(&mut self) -> Option<Self::Item> {
         self.iter.next_back().map(|(_, val)| val)
     }
 }
 
-impl<V, const R: usize, const B: u8, K> 
-    FromIterator<(K, V)> for TrieMap<V, R, B> 
+pub struct ValuesMut<'a, V, const R: usize, const B: u8> {
+    iter: IterMut<'a, V, R, B>,
+}
+
+impl<'a, V, const R: usize, const B: u8> ValuesMut<'a, V, R, B> {
+    pub(crate) fn new(trie: &'a mut TrieMap<V, R, B>) -> Self {
+        Self { iter: IterMut::new(trie) }
+    }
+}
+
+impl<'a, V, const R: usize, const B: u8> Iterator for ValuesMut<'a, V, R, B> {
+    type Item = &'a mut V;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.iter.next().map(|(_, val)| val)
+    }
+}
+
+impl<'a, V, const R: usize, const B: u8>
+    DoubleEndedIterator for ValuesMut<'a, V, R, B>
+{
+    fn next_back(&mut self) -> Option<Self::Item> {
+        self.iter.next_back().map(|(_, val)| val)
+    }
+}
+
+impl<V, const R: usize, const B: u8, K>
+    FromIterator<(K, V)> for TrieMap<V, R, B>
 where
     K: AsRef<[u8]>,
 {
@@ -627,13 +653,13 @@ mod tests {
 
     #[test]
     fn sorting() {
-        let mut words = ["engineering", "physics", "elephant", "economics", 
-                         "psychology", "anthropology", "language", "biology", 
-                         "kinematics", "linguistics", "geography", "computer", 
-                         "oceanography", "programming", "architecture", 
-                         "astronomy", "history", "quantum", "sociology", 
-                         "journalism", "democracy", "chemistry", "zoology", 
-                         "mathematics", "javascript", "philosophy", 
+        let mut words = ["engineering", "physics", "elephant", "economics",
+                         "psychology", "anthropology", "language", "biology",
+                         "kinematics", "linguistics", "geography", "computer",
+                         "oceanography", "programming", "architecture",
+                         "astronomy", "history", "quantum", "sociology",
+                         "journalism", "democracy", "chemistry", "zoology",
+                         "mathematics", "javascript", "philosophy",
                          "literature", "python", "nutrition", "metaphysics"];
 
         let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
@@ -644,7 +670,7 @@ mod tests {
         words.sort();
 
         let mut words = words.iter().map(|s| s.to_string()).collect::<Vec<_>>();
-        
+
         let sort1 = trie.keys().map(|b| Ok(String::from_utf8(b.to_vec())?))
                         .collect::<Result<Vec<_>, Box<dyn Error>>>()
                         .unwrap();
