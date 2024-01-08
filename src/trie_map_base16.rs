@@ -336,7 +336,7 @@ pub(crate) fn decode(bytes: Box<[u8]>) -> String {
 }
 
 pub struct IntoIter<V> {
-    iter: crate::iterators::IntoIter<V, 16, b'a'>,
+    iter: crate::trie_map_iterators::IntoIter<V, 16, b'a'>,
 }
 
 impl<V> Iterator for IntoIter<V> {
@@ -363,7 +363,7 @@ impl<V> IntoIterator for TrieMapBase16<V> {
 }
 
 pub struct Iter<'a, V> {
-    iter: crate::iterators::Iter<'a, V, 16, b'a'>,
+    iter: crate::trie_map_iterators::Iter<'a, V, 16, b'a'>,
 }
 
 impl<'a, V> Iterator for Iter<'a, V> {
@@ -390,7 +390,7 @@ impl<'a, V> IntoIterator for &'a TrieMapBase16<V> {
 }
 
 pub struct IterMut<'a, V> {
-    iter: crate::iterators::IterMut<'a, V, 16, b'a'>,
+    iter: crate::trie_map_iterators::IterMut<'a, V, 16, b'a'>,
 }
 
 impl<'a, V> Iterator for IterMut<'a, V> {
@@ -417,11 +417,11 @@ impl<'a, V> IntoIterator for &'a mut TrieMapBase16<V> {
 }
 
 pub struct Keys<'a, V> {
-    iter: crate::iterators::Keys<'a, V, 16, b'a'>,
+    iter: crate::trie_map_iterators::Keys<'a, V, 16, b'a'>,
 }
 
 impl<'a, V> Keys<'a, V> {
-    fn new(iter: crate::iterators::Keys<'a, V, 16, b'a'>) -> Self {
+    fn new(iter: crate::trie_map_iterators::Keys<'a, V, 16, b'a'>) -> Self {
         Self { iter  }
     }
 }
@@ -441,11 +441,11 @@ impl<'a, V> DoubleEndedIterator for Keys<'a, V> {
 }
 
 pub struct Values<'a, V> {
-    iter: crate::iterators::Values<'a, V, 16, b'a'>,
+    iter: crate::trie_map_iterators::Values<'a, V, 16, b'a'>,
 }
 
 impl<'a, V> Values<'a, V> {
-    fn new(iter: crate::iterators::Values<'a, V, 16, b'a'>) -> Self {
+    fn new(iter: crate::trie_map_iterators::Values<'a, V, 16, b'a'>) -> Self {
         Self { iter  }
     }
 }

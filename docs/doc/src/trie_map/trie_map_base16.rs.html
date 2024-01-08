@@ -1087,7 +1087,7 @@
 }
 
 <span class="kw">pub struct </span>IntoIter&lt;V&gt; {
-    iter: <span class="kw">crate</span>::iterators::IntoIter&lt;V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
+    iter: <span class="kw">crate</span>::trie_map_iterators::IntoIter&lt;V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
 <span class="kw">impl</span>&lt;V&gt; Iterator <span class="kw">for </span>IntoIter&lt;V&gt; {
@@ -1114,7 +1114,7 @@
 }
 
 <span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, V&gt; {
-    iter: <span class="kw">crate</span>::iterators::Iter&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
+    iter: <span class="kw">crate</span>::trie_map_iterators::Iter&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, V&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, V&gt; {
@@ -1141,7 +1141,7 @@
 }
 
 <span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">&#39;a</span>, V&gt; {
-    iter: <span class="kw">crate</span>::iterators::IterMut&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
+    iter: <span class="kw">crate</span>::trie_map_iterators::IterMut&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, V&gt; Iterator <span class="kw">for </span>IterMut&lt;<span class="lifetime">&#39;a</span>, V&gt; {
@@ -1168,11 +1168,11 @@
 }
 
 <span class="kw">pub struct </span>Keys&lt;<span class="lifetime">&#39;a</span>, V&gt; {
-    iter: <span class="kw">crate</span>::iterators::Keys&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
+    iter: <span class="kw">crate</span>::trie_map_iterators::Keys&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, V&gt; Keys&lt;<span class="lifetime">&#39;a</span>, V&gt; {
-    <span class="kw">fn </span>new(iter: <span class="kw">crate</span>::iterators::Keys&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(iter: <span class="kw">crate</span>::trie_map_iterators::Keys&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ iter  }
     }
 }
@@ -1192,11 +1192,11 @@
 }
 
 <span class="kw">pub struct </span>Values&lt;<span class="lifetime">&#39;a</span>, V&gt; {
-    iter: <span class="kw">crate</span>::iterators::Values&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
+    iter: <span class="kw">crate</span>::trie_map_iterators::Values&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, V&gt; Values&lt;<span class="lifetime">&#39;a</span>, V&gt; {
-    <span class="kw">fn </span>new(iter: <span class="kw">crate</span>::iterators::Values&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;) -&gt; <span class="self">Self </span>{
+    <span class="kw">fn </span>new(iter: <span class="kw">crate</span>::trie_map_iterators::Values&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{ iter  }
     }
 }

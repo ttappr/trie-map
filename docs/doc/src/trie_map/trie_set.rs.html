@@ -274,7 +274,7 @@
 </span><span class="kw">use </span>std::fmt;
 
 <span class="kw">use </span><span class="kw">crate</span>::TrieMap;
-<span class="kw">use </span><span class="kw">crate</span>::iterators;
+<span class="kw">use </span><span class="kw">crate</span>::trie_map_iterators;
 
 <span class="doccomment">/// A set implemented using TrieMap. Internally this is a TrieMap with a unit
 /// type as the value. This is a convenience type for when you want to use a
@@ -413,7 +413,7 @@
 }
 
 <span class="kw">pub struct </span>IntoIter&lt;<span class="kw">const </span>R: usize, <span class="kw">const </span>B: u8&gt; {
-    iter: iterators::IntoIter&lt;(), R, B&gt;,
+    iter: trie_map_iterators::IntoIter&lt;(), R, B&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="kw">const </span>R: usize, <span class="kw">const </span>B: u8&gt; Iterator <span class="kw">for </span>IntoIter&lt;R, B&gt; {
@@ -440,7 +440,7 @@
 }
 
 <span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, <span class="kw">const </span>R: usize, <span class="kw">const </span>B: u8&gt; {
-    iter: iterators::Iter&lt;<span class="lifetime">&#39;a</span>, (), R, B&gt;,
+    iter: trie_map_iterators::Iter&lt;<span class="lifetime">&#39;a</span>, (), R, B&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>, <span class="kw">const </span>R: usize, <span class="kw">const </span>B: u8&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>, R, B&gt; {

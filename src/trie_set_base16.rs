@@ -120,7 +120,7 @@ impl Default for TrieSetBase16 {
 /// An iterator over the elements of a TrieSet.
 ///
 pub struct Iter<'a> {
-    iter: crate::iterators::Iter<'a, (), 16, b'a'>,
+    iter: crate::trie_map_iterators::Iter<'a, (), 16, b'a'>,
 }
 
 impl<'a> Iterator for Iter<'a> {
@@ -149,7 +149,7 @@ impl<'a> IntoIterator for &'a TrieSetBase16 {
 /// An owning iterator over the elements of a TrieSet.
 ///
 pub struct IntoIter {
-    iter: crate::iterators::IntoIter<(), 16, b'a'>,
+    iter: crate::trie_map_iterators::IntoIter<(), 16, b'a'>,
 }
 
 impl DoubleEndedIterator for IntoIter {

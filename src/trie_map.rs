@@ -20,7 +20,7 @@
 
 use std::fmt;
 
-use crate::iterators::{Iter, IterMut, Keys, Values, ValuesMut};
+use crate::trie_map_iterators::{Iter, IterMut, Keys, Values, ValuesMut};
 
 pub(crate) const ROOT_HANDLE: NodeHandle = NodeHandle(0);
 

@@ -414,7 +414,7 @@
 <span class="doccomment">/// An iterator over the elements of a TrieSet.
 ///
 </span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
-    iter: <span class="kw">crate</span>::iterators::Iter&lt;<span class="lifetime">&#39;a</span>, (), <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
+    iter: <span class="kw">crate</span>::trie_map_iterators::Iter&lt;<span class="lifetime">&#39;a</span>, (), <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
 <span class="kw">impl</span>&lt;<span class="lifetime">&#39;a</span>&gt; Iterator <span class="kw">for </span>Iter&lt;<span class="lifetime">&#39;a</span>&gt; {
@@ -443,7 +443,7 @@
 <span class="doccomment">/// An owning iterator over the elements of a TrieSet.
 ///
 </span><span class="kw">pub struct </span>IntoIter {
-    iter: <span class="kw">crate</span>::iterators::IntoIter&lt;(), <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
+    iter: <span class="kw">crate</span>::trie_map_iterators::IntoIter&lt;(), <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
 <span class="kw">impl </span>DoubleEndedIterator <span class="kw">for </span>IntoIter {

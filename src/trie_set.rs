@@ -4,7 +4,7 @@
 use std::fmt;
 
 use crate::TrieMap;
-use crate::iterators;
+use crate::trie_map_iterators;
 
 /// A set implemented using TrieMap. Internally this is a TrieMap with a unit
 /// type as the value. This is a convenience type for when you want to use a
@@ -143,7 +143,7 @@ impl<const R: usize, const B: u8> Default for TrieSet<R, B> {
 }
 
 pub struct IntoIter<const R: usize, const B: u8> {
-    iter: iterators::IntoIter<(), R, B>,
+    iter: trie_map_iterators::IntoIter<(), R, B>,
 }
 
 impl<const R: usize, const B: u8> Iterator for IntoIter<R, B> {
@@ -170,7 +170,7 @@ impl<'a, const R: usize, const B: u8> IntoIterator for TrieSet<R, B> {
 }
 
 pub struct Iter<'a, const R: usize, const B: u8> {
-    iter: iterators::Iter<'a, (), R, B>,
+    iter: trie_map_iterators::Iter<'a, (), R, B>,
 }
 
 impl<'a, const R: usize, const B: u8> Iterator for Iter<'a, R, B> {
