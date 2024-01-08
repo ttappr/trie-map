@@ -42,7 +42,7 @@ impl TrieSetBase16 {
     /// ```
     ///
     pub fn contains(&self, key: &str) -> bool {
-        self.trie.contains_by_iter(Encoder::new(key.bytes()))
+        self.trie.contains_key_by_iter(Encoder::new(key.bytes()))
     }
 
     /// Reports whether the set contains the given key. The key is given as an
@@ -52,7 +52,7 @@ impl TrieSetBase16 {
     where
         K: Iterator<Item = u8>,
     {
-        self.trie.contains_by_iter(iter)
+        self.trie.contains_key_by_iter(iter)
     }
 
     /// Inserts the given key into the set. Returns true if the key was not
@@ -186,6 +186,13 @@ mod tests {
     use super::*;
 
     macro_rules! s { ($s:expr) => { $s.to_string() } }
+
+    #[test]
+    fn default() {
+        let set = TrieSetBase16::default();
+        assert!(set.is_empty());
+        assert_eq!(set.len(), 0);
+    }
 
     #[test]
     fn clear() {
