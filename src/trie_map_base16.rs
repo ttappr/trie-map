@@ -449,7 +449,7 @@ impl<'a, V> DoubleEndedIterator for Keys<'a, V> {
     }
 }
 
-/// An iterator over the values of a `TrieMapBase16``.
+/// An iterator over the values of a `TrieMapBase16`.
 /// 
 pub struct Values<'a, V> {
     iter: crate::trie_map_iterators::Values<'a, V, 16, b'a'>,
@@ -475,7 +475,7 @@ impl<'a, V> DoubleEndedIterator for Values<'a, V> {
     }
 }
 
-/// An iterator over mutable values of a `TrieMapBase16``.
+/// An iterator over mutable values of a `TrieMapBase16`.
 /// 
 pub struct ValuesMut<'a, V> {
     iter: IterMut<'a, V>,
