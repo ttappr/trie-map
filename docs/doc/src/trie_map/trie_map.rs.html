@@ -1028,7 +1028,7 @@
     <span class="kw">where
         </span>K: AsRef&lt;[u8]&gt;,
     {
-        <span class="self">self</span>.contains_by_iter(key.as_ref().into_iter().copied())
+        <span class="self">self</span>.contains_key_by_iter(key.as_ref().into_iter().copied())
     }
 
     <span class="doccomment">/// Returns `true` if the trie contains a value at the given key, otherwise
@@ -1048,9 +1048,9 @@
     /// window.pop_front();
     /// window.push_back(b&#39;o&#39;);
     ///
-    /// assert_eq!(trie.contains_by_iter(window.range(0..5).copied()), true);
+    /// assert_eq!(trie.contains_key_by_iter(window.range(0..5).copied()), true);
     /// ```
-    </span><span class="kw">pub fn </span>contains_by_iter&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; bool
+    </span><span class="kw">pub fn </span>contains_key_by_iter&lt;K&gt;(<span class="kw-2">&amp;</span><span class="self">self</span>, key: K) -&gt; bool
     <span class="kw">where
         </span>K: Iterator&lt;Item = u8&gt;,
     {

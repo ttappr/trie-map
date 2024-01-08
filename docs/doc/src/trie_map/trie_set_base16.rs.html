@@ -292,6 +292,13 @@
 <a href="#292" id="292">292</a>
 <a href="#293" id="293">293</a>
 <a href="#294" id="294">294</a>
+<a href="#295" id="295">295</a>
+<a href="#296" id="296">296</a>
+<a href="#297" id="297">297</a>
+<a href="#298" id="298">298</a>
+<a href="#299" id="299">299</a>
+<a href="#300" id="300">300</a>
+<a href="#301" id="301">301</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A set implemented as a trie. The keys are strings, which are base 16
 //! encoded when stored in the trie. Thus there are no strictions on the
 //! range of characters the keys can contain. Each node of the tree has a
@@ -336,7 +343,7 @@
     /// ```
     ///
     </span><span class="kw">pub fn </span>contains(<span class="kw-2">&amp;</span><span class="self">self</span>, key: <span class="kw-2">&amp;</span>str) -&gt; bool {
-        <span class="self">self</span>.trie.contains_by_iter(Encoder::new(key.bytes()))
+        <span class="self">self</span>.trie.contains_key_by_iter(Encoder::new(key.bytes()))
     }
 
     <span class="doccomment">/// Reports whether the set contains the given key. The key is given as an
@@ -346,7 +353,7 @@
     <span class="kw">where
         </span>K: Iterator&lt;Item = u8&gt;,
     {
-        <span class="self">self</span>.trie.contains_by_iter(iter)
+        <span class="self">self</span>.trie.contains_key_by_iter(iter)
     }
 
     <span class="doccomment">/// Inserts the given key into the set. Returns true if the key was not
@@ -480,6 +487,13 @@
     <span class="kw">use super</span>::<span class="kw-2">*</span>;
 
     <span class="macro">macro_rules! </span>s { (<span class="macro-nonterminal">$s</span>:expr) =&gt; { <span class="macro-nonterminal">$s</span>.to_string() } }
+
+    <span class="attr">#[test]
+    </span><span class="kw">fn </span>default() {
+        <span class="kw">let </span>set = TrieSetBase16::default();
+        <span class="macro">assert!</span>(set.is_empty());
+        <span class="macro">assert_eq!</span>(set.len(), <span class="number">0</span>);
+    }
 
     <span class="attr">#[test]
     </span><span class="kw">fn </span>clear() {
