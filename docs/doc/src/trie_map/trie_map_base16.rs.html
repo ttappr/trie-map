@@ -749,6 +749,19 @@
 <a href="#749" id="749">749</a>
 <a href="#750" id="750">750</a>
 <a href="#751" id="751">751</a>
+<a href="#752" id="752">752</a>
+<a href="#753" id="753">753</a>
+<a href="#754" id="754">754</a>
+<a href="#755" id="755">755</a>
+<a href="#756" id="756">756</a>
+<a href="#757" id="757">757</a>
+<a href="#758" id="758">758</a>
+<a href="#759" id="759">759</a>
+<a href="#760" id="760">760</a>
+<a href="#761" id="761">761</a>
+<a href="#762" id="762">762</a>
+<a href="#763" id="763">763</a>
+<a href="#764" id="764">764</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! A trie whose keys can be any string with no restrictions on characters.
 //! This is achieved by base 16 encoding the key as it&#39;s inserted into the trie.
 //!
@@ -1086,7 +1099,9 @@
     String::from_utf8(str).unwrap()
 }
 
-<span class="kw">pub struct </span>IntoIter&lt;V&gt; {
+<span class="doccomment">/// A consuming iterator over the key-value pairs of a `TrieMapBase16`.
+/// 
+</span><span class="kw">pub struct </span>IntoIter&lt;V&gt; {
     iter: <span class="kw">crate</span>::trie_map_iterators::IntoIter&lt;V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
@@ -1113,7 +1128,9 @@
     }
 }
 
-<span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, V&gt; {
+<span class="doccomment">/// An iterator over the key-value pairs of a `TrieMapBase16`.
+/// 
+</span><span class="kw">pub struct </span>Iter&lt;<span class="lifetime">&#39;a</span>, V&gt; {
     iter: <span class="kw">crate</span>::trie_map_iterators::Iter&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
@@ -1140,7 +1157,10 @@
     }
 }
 
-<span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">&#39;a</span>, V&gt; {
+<span class="doccomment">/// An iterator over the key-value pairs of a `TrieMapBase16`. The values are
+/// mutable.
+/// 
+</span><span class="kw">pub struct </span>IterMut&lt;<span class="lifetime">&#39;a</span>, V&gt; {
     iter: <span class="kw">crate</span>::trie_map_iterators::IterMut&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
@@ -1167,7 +1187,9 @@
     }
 }
 
-<span class="kw">pub struct </span>Keys&lt;<span class="lifetime">&#39;a</span>, V&gt; {
+<span class="doccomment">/// An iterator over the keys of a `TrieMapBase16`.
+/// 
+</span><span class="kw">pub struct </span>Keys&lt;<span class="lifetime">&#39;a</span>, V&gt; {
     iter: <span class="kw">crate</span>::trie_map_iterators::Keys&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
@@ -1191,7 +1213,9 @@
     }
 }
 
-<span class="kw">pub struct </span>Values&lt;<span class="lifetime">&#39;a</span>, V&gt; {
+<span class="doccomment">/// An iterator over the values of a `TrieMapBase16``.
+/// 
+</span><span class="kw">pub struct </span>Values&lt;<span class="lifetime">&#39;a</span>, V&gt; {
     iter: <span class="kw">crate</span>::trie_map_iterators::Values&lt;<span class="lifetime">&#39;a</span>, V, <span class="number">16</span>, <span class="string">b&#39;a&#39;</span>&gt;,
 }
 
@@ -1215,7 +1239,9 @@
     }
 }
 
-<span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, V&gt; {
+<span class="doccomment">/// An iterator over mutable values of a `TrieMapBase16``.
+/// 
+</span><span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, V&gt; {
     iter: IterMut&lt;<span class="lifetime">&#39;a</span>, V&gt;,
 }
 

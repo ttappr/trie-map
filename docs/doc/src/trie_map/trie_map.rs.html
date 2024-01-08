@@ -1041,9 +1041,9 @@
     ///
     /// let mut trie: TrieMap&lt;i32, 26, b&#39;a&#39;&gt; = TrieMap::new();
     ///
-    /// trie.insert(b&quot;hello&quot;, 1);
+    /// trie.insert(&quot;hello&quot;, 1);
     ///
-    /// let mut window = b&quot;hhell&quot;.iter().copied().collect::&lt;VecDeque&lt;_&gt;&gt;();
+    /// let mut window = &quot;hhell&quot;.bytes().collect::&lt;VecDeque&lt;_&gt;&gt;();
     ///
     /// window.pop_front();
     /// window.push_back(b&#39;o&#39;);
@@ -1098,7 +1098,7 @@
     ///
     /// trie.insert(&quot;hello&quot;, 1);
     ///
-    /// let mut window = b&quot;hhell&quot;.iter().copied().collect::&lt;VecDeque&lt;_&gt;&gt;();
+    /// let mut window = &quot;hhell&quot;.bytes().collect::&lt;VecDeque&lt;_&gt;&gt;();
     ///
     /// window.pop_front();
     /// window.push_back(b&#39;o&#39;);

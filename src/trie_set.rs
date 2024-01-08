@@ -142,6 +142,8 @@ impl<const R: usize, const B: u8> Default for TrieSet<R, B> {
     }
 }
 
+/// An iterator over the elements of a TrieSet.
+/// 
 pub struct IntoIter<const R: usize, const B: u8> {
     iter: trie_map_iterators::IntoIter<(), R, B>,
 }
@@ -169,6 +171,8 @@ impl<'a, const R: usize, const B: u8> IntoIterator for TrieSet<R, B> {
     }
 }
 
+/// An iterator over the elements of a TrieSet.
+/// 
 pub struct Iter<'a, const R: usize, const B: u8> {
     iter: trie_map_iterators::Iter<'a, (), R, B>,
 }

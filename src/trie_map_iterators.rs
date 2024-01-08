@@ -357,6 +357,9 @@ impl<'a, V, const R: usize, const B: u8>
     }
 }
 
+/// An iterator over the values of a `TrieMap` that holds a mutable reference
+/// to the trie. It produces items that can be modified by the caller.
+/// 
 pub struct ValuesMut<'a, V, const R: usize, const B: u8> {
     iter: IterMut<'a, V, R, B>,
 }

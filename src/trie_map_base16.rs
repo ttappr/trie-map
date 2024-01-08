@@ -335,6 +335,8 @@ pub(crate) fn decode(bytes: Box<[u8]>) -> String {
     String::from_utf8(str).unwrap()
 }
 
+/// A consuming iterator over the key-value pairs of a `TrieMapBase16`.
+/// 
 pub struct IntoIter<V> {
     iter: crate::trie_map_iterators::IntoIter<V, 16, b'a'>,
 }
@@ -362,6 +364,8 @@ impl<V> IntoIterator for TrieMapBase16<V> {
     }
 }
 
+/// An iterator over the key-value pairs of a `TrieMapBase16`.
+/// 
 pub struct Iter<'a, V> {
     iter: crate::trie_map_iterators::Iter<'a, V, 16, b'a'>,
 }
@@ -389,6 +393,9 @@ impl<'a, V> IntoIterator for &'a TrieMapBase16<V> {
     }
 }
 
+/// An iterator over the key-value pairs of a `TrieMapBase16`. The values are
+/// mutable.
+/// 
 pub struct IterMut<'a, V> {
     iter: crate::trie_map_iterators::IterMut<'a, V, 16, b'a'>,
 }
@@ -416,6 +423,8 @@ impl<'a, V> IntoIterator for &'a mut TrieMapBase16<V> {
     }
 }
 
+/// An iterator over the keys of a `TrieMapBase16`.
+/// 
 pub struct Keys<'a, V> {
     iter: crate::trie_map_iterators::Keys<'a, V, 16, b'a'>,
 }
@@ -440,6 +449,8 @@ impl<'a, V> DoubleEndedIterator for Keys<'a, V> {
     }
 }
 
+/// An iterator over the values of a `TrieMapBase16``.
+/// 
 pub struct Values<'a, V> {
     iter: crate::trie_map_iterators::Values<'a, V, 16, b'a'>,
 }
@@ -464,6 +475,8 @@ impl<'a, V> DoubleEndedIterator for Values<'a, V> {
     }
 }
 
+/// An iterator over mutable values of a `TrieMapBase16``.
+/// 
 pub struct ValuesMut<'a, V> {
     iter: IterMut<'a, V>,
 }

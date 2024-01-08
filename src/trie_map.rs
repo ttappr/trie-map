@@ -138,9 +138,9 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
     ///
-    /// trie.insert(b"hello", 1);
+    /// trie.insert("hello", 1);
     ///
-    /// let mut window = b"hhell".iter().copied().collect::<VecDeque<_>>();
+    /// let mut window = "hhell".bytes().collect::<VecDeque<_>>();
     ///
     /// window.pop_front();
     /// window.push_back(b'o');
@@ -195,7 +195,7 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
     ///
     /// trie.insert("hello", 1);
     ///
-    /// let mut window = b"hhell".iter().copied().collect::<VecDeque<_>>();
+    /// let mut window = "hhell".bytes().collect::<VecDeque<_>>();
     ///
     /// window.pop_front();
     /// window.push_back(b'o');

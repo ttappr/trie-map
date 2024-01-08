@@ -698,6 +698,9 @@
 <a href="#698" id="698">698</a>
 <a href="#699" id="699">699</a>
 <a href="#700" id="700">700</a>
+<a href="#701" id="701">701</a>
+<a href="#702" id="702">702</a>
+<a href="#703" id="703">703</a>
 </pre></div><pre class="rust"><code><span class="doccomment">//! # Iterators, The Iterators Used in TrieMap
 //!
 //! Each iterator implements the InnerIter trait, which provides the traversal
@@ -1057,7 +1060,10 @@
     }
 }
 
-<span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, V, <span class="kw">const </span>R: usize, <span class="kw">const </span>B: u8&gt; {
+<span class="doccomment">/// An iterator over the values of a `TrieMap` that holds a mutable reference
+/// to the trie. It produces items that can be modified by the caller.
+/// 
+</span><span class="kw">pub struct </span>ValuesMut&lt;<span class="lifetime">&#39;a</span>, V, <span class="kw">const </span>R: usize, <span class="kw">const </span>B: u8&gt; {
     iter: IterMut&lt;<span class="lifetime">&#39;a</span>, V, R, B&gt;,
 }
 
