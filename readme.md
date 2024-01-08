@@ -16,14 +16,14 @@ The size of the node arrays can be configured through the generic parameters,
 supports keys composed of the 26 lowercase ASCII characters.
 
 ``` rust
-use trie_map::TrieMap;
+    use trie_map::TrieMap;
 
-// RANGE = 26, BASE_CHAR = b'a'.
-let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
+    // RANGE = 26, BASE_CHAR = b'a'.
+    let mut trie: TrieMap<i32, 26, b'a'> = TrieMap::new();
 
-trie.insert("hello", 1);
+    trie.insert("hello", 1);
 
-assert_eq!(trie.contains("hello"), true);
+    assert_eq!(trie.contains("hello"), true);
 ```
 
 Each node of the trie, as configured above, will have a fixed-size descendant 
@@ -40,7 +40,7 @@ represent anything suitable to a project's requirements so long as `RANGE` and
 
 ### Base 16 Wrappers
 
-This crate provides `trie_map_base16::{TrieMapBase16<V>, TrieSetBase16<V>}` 
+This crate provides `base16::{TrieMapBase16<V>, TrieSetBase16<V>}` 
 which wrap a `TrieMap<V, 16, b'a'>` instance and base16 encode its keys so 
 there's no restriction on the characters in strings used as keys. Strings could 
 be in Greek, or any language for that matter, and contain special characters.
@@ -55,16 +55,33 @@ can be used in other specialized custom tries.
 
 ``` rust
     use trie_map::base16::TrieMapBase16;
-    
-    let mut trie = TrieMapBase16::new();
-    
-    trie.insert("Γειά σου", 1);
-    trie.insert("κόσμος", 2);
-    trie.insert("👋", 42);
-    trie.insert("🌍", 43);
-    
-    assert_eq!(trie.get("Γειά σου"), Some(&1));
-    assert_eq!(trie.get("κόσμος"), Some(&2));
-    assert_eq!(trie.get("👋"), Some(&42));
-    assert_eq!(trie.get("🌍"), Some(&43));
+    use std::collections::VecDeque;
+    use std::iter::repeat;
+
+    const WIN_LEN: usize = 20;
+
+    let input = "ababcdjjjabxzydjjzxyababzbabajjjjj";
+    let words = [("ababcd", 1), ("abxzyd", 2), 
+                 ("bzbaba", 3), ("zxyaba", 4)];
+
+    let mut window = repeat(b'_').take(WIN_LEN).collect::<VecDeque<_>>();
+    let mut count  = 0;
+
+    let trie = words.into_iter().collect::<TrieMapBase16<i32>>();
+
+    let k = words[0].0.len();
+
+    for b in input.bytes() {
+        window.pop_front();
+        window.push_back(b);
+        
+        if trie.contains_key_by_iter(window.range(WIN_LEN - k..).copied()) {
+            count += 1;
+            println!("{count} words currently in the window.");
+        }
+        if trie.contains_key_by_iter(window.range(..k).copied()) {
+            count -= 1;
+            println!("{count} words currently in the window.");
+        }
+    }
 ```
