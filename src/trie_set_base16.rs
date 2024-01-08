@@ -1,8 +1,8 @@
-//! A set implemented as a trie. The keys are strings, which are base 16 
+//! A set implemented as a trie. The keys are strings, which are base 16
 //! encoded when stored in the trie. Thus there are no strictions on the
 //! range of characters the keys can contain. Each node of the tree has a
 //! fixed-size array to its successors (order/branching-factor of 16).
-//! 
+//!
 
 use std::borrow::Borrow;
 use std::fmt;
@@ -11,20 +11,20 @@ use crate::TrieMap;
 use crate::trie_map_base16::{Encoder, decode};
 
 /// A set implemented as a trie that encodes its keys as base 16 bytes.
-/// 
+///
 pub struct TrieSetBase16 {
     trie: TrieMap<(), 16, b'a'>,
 }
 
 impl TrieSetBase16 {
     /// Creates a new empty TrieSet.
-    /// 
+    ///
     pub fn new() -> Self {
         Self { trie: TrieMap::new() }
     }
 
     /// Removes all elements from the set.
-    /// 
+    ///
     pub fn clear(&mut self) {
         self.trie.clear();
     }
@@ -32,22 +32,22 @@ impl TrieSetBase16 {
     /// Reports whether the set contains the given key.
     /// ```
     /// use trie_map::base16::TrieSetBase16;
-    /// 
+    ///
     /// let mut set = TrieSetBase16::new();
-    /// 
+    ///
     /// assert!(set.insert("hello"));
-    /// 
+    ///
     /// assert!(!set.contains("world"));
     /// assert!(set.contains("hello"));
     /// ```
-    /// 
+    ///
     pub fn contains(&self, key: &str) -> bool {
         self.trie.contains_by_iter(Encoder::new(key.bytes()))
     }
 
     /// Reports whether the set contains the given key. The key is given as an
     /// iterator.
-    /// 
+    ///
     pub fn contains_by_iter<K>(&self, iter: K) -> bool
     where
         K: Iterator<Item = u8>,
@@ -57,8 +57,8 @@ impl TrieSetBase16 {
 
     /// Inserts the given key into the set. Returns true if the key was not
     /// already present.
-    /// 
-    pub fn insert<K>(&mut self, key: K) -> bool 
+    ///
+    pub fn insert<K>(&mut self, key: K) -> bool
     where
         K: Borrow<str>,
     {
@@ -68,7 +68,7 @@ impl TrieSetBase16 {
 
     /// Inserts the given key into the set. Returns true if the key was not
     /// already present.
-    /// 
+    ///
     pub fn insert_by_iter<K>(&mut self, iter: K) -> bool
     where
         K: Iterator<Item = u8>,
@@ -77,32 +77,32 @@ impl TrieSetBase16 {
     }
 
     /// Reports whether the set is empty.
-    /// 
+    ///
     pub fn is_empty(&self) -> bool {
         self.trie.is_empty()
     }
 
     /// Returns an iterator over the set.
-    /// 
+    ///
     pub fn iter(&self) -> Iter {
         Iter { iter: self.trie.iter() }
     }
 
     /// Returns an iterator over the set.
-    /// 
+    ///
     pub fn len(&self) -> usize {
         self.trie.len()
     }
 
     /// Removes the given key from the set. Returns true if the key was present.
-    /// 
+    ///
     pub fn remove(&mut self, key: &str) -> bool {
         self.trie.remove_by_iter(Encoder::new(key.bytes())).is_some()
     }
-    
+
     /// Removes the given key from the set. Returns true if the key was present.
     /// The key is given as an iterator.
-    /// 
+    ///
     pub fn remove_by_iter<K>(&mut self, iter: K) -> bool
     where
         K: Iterator<Item = u8>,
@@ -118,7 +118,7 @@ impl Default for TrieSetBase16 {
 }
 
 /// An iterator over the elements of a TrieSet.
-/// 
+///
 pub struct Iter<'a> {
     iter: crate::iterators::Iter<'a, (), 16, b'a'>,
 }
@@ -147,7 +147,7 @@ impl<'a> IntoIterator for &'a TrieSetBase16 {
 }
 
 /// An owning iterator over the elements of a TrieSet.
-/// 
+///
 pub struct IntoIter {
     iter: crate::iterators::IntoIter<(), 16, b'a'>,
 }
@@ -253,7 +253,7 @@ mod tests {
         set.remove("foo");
         assert!(set.is_empty());
     }
-    
+
     #[test]
     fn iter() {
         let mut set = TrieSetBase16::new();
@@ -263,17 +263,17 @@ mod tests {
         set.insert("μπαρ");
         assert_eq!(
             set.iter().collect::<Vec<_>>(),
-            vec![s!("bar"), s!("foo"), 
+            vec![s!("bar"), s!("foo"),
                  s!("μπαρ"), s!("τροφή")]
         );
         assert_eq!(
             set.iter().rev().collect::<Vec<_>>(),
-            vec![s!("τροφή"), s!("μπαρ"), 
+            vec![s!("τροφή"), s!("μπαρ"),
                  s!("foo"), s!("bar")]
         );
         assert_eq!(
             set.into_iter().collect::<Vec<_>>(),
-            vec![s!("bar"), s!("foo"), 
+            vec![s!("bar"), s!("foo"),
                  s!("μπαρ"), s!("τροφή")]
         );
     }

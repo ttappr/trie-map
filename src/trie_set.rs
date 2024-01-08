@@ -1,5 +1,5 @@
 //! A set implemented using TrieMap.
-//! 
+//!
 
 use std::fmt;
 
@@ -9,20 +9,20 @@ use crate::iterators;
 /// A set implemented using TrieMap. Internally this is a TrieMap with a unit
 /// type as the value. This is a convenience type for when you want to use a
 /// TrieMap as a set.
-/// 
+///
 pub struct TrieSet<const R: usize, const B: u8> {
     trie: TrieMap<(), R, B>
 }
 
 impl<const R: usize, const B: u8> TrieSet<R, B> {
     /// Creates a new empty TrieSet.
-    /// 
+    ///
     pub fn new() -> Self {
         Self { trie: TrieMap::new() }
     }
 
     /// Removes all elements from the set.
-    /// 
+    ///
     pub fn clear(&mut self) {
         self.trie.clear();
     }
@@ -30,14 +30,17 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
     /// Reports whether the set contains the given key.
     /// ```
     /// use trie_map::TrieSet;
-    /// 
+    ///
     /// let mut set = TrieSet::<26, b'a'>::new();
-    /// 
+    ///
     /// assert!(set.insert("hello"));
     /// assert!(set.contains("hello"));
     /// assert!(!set.contains("world"));
     /// ````
-    pub fn contains<K: AsRef<[u8]>>(&self, key: K) -> bool {
+    pub fn contains<K>(&self, key: K) -> bool 
+    where
+        K: AsRef<[u8]>
+    {
         self.trie.get(key).is_some()
     }
 
@@ -45,14 +48,14 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
     /// iterator.
     /// ```
     /// use trie_map::TrieSet;
-    /// 
+    ///
     /// let mut set = TrieSet::<26, b'a'>::new();
-    /// 
+    ///
     /// assert!(set.insert("hello"));
     /// assert!(set.contains_by_iter("hello".bytes()));
     /// assert!(!set.contains_by_iter("world".bytes()));
     /// ```
-    pub fn contains_by_iter<K>(&self, key: K) -> bool 
+    pub fn contains_by_iter<K>(&self, key: K) -> bool
     where
         K: Iterator<Item = u8>
     {
@@ -63,21 +66,24 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
     /// already present.
     /// ```
     /// use trie_map::TrieSet;
-    /// 
+    ///
     /// let mut set = TrieSet::<26, b'a'>::new();
-    /// 
+    ///
     /// assert!(set.insert("hello"));
     /// assert!(!set.insert("hello"));
     /// assert!(set.insert("world"));
     /// ````
-    pub fn insert<K: AsRef<[u8]>>(&mut self, key: K) -> bool {
+    pub fn insert<K>(&mut self, key: K) -> bool 
+    where
+        K: AsRef<[u8]>
+    {
         self.trie.insert(key, ()).is_none()
     }
 
     /// Inserts the given key into the set. Returns true if the key was not
     /// already present. The key is given as an iterator.
-    /// 
-    pub fn insert_by_iter<K>(&mut self, key: K) -> bool 
+    ///
+    pub fn insert_by_iter<K>(&mut self, key: K) -> bool
     where
         K: Iterator<Item = u8>
     {
@@ -85,26 +91,29 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
     }
 
     /// Returns true if the set contains no elements.
-    /// 
+    ///
     pub fn is_empty(&self) -> bool {
         self.trie.is_empty()
     }
 
     /// Returns an iterator over the keys of the set.
-    /// 
+    ///
     pub fn iter(&self) -> Iter<R, B> {
         self.into_iter()
     }
 
     /// Returns the number of elements in the set.
-    /// 
+    ///
     pub fn len(&self) -> usize {
         self.trie.len()
     }
 
     /// Removes the given key from the set. Returns true if the key was present.
-    /// 
-    pub fn remove<K: AsRef<[u8]>>(&mut self, key: K) -> bool {
+    ///
+    pub fn remove<K>(&mut self, key: K) -> bool 
+    where
+        K: AsRef<[u8]>
+    {
         self.trie.remove(key).is_some()
     }
 
@@ -112,14 +121,14 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
     /// The key is given as an iterator.
     /// ```
     /// use trie_map::TrieSet;
-    /// 
+    ///
     /// let mut set = TrieSet::<26, b'a'>::new();
-    /// 
+    ///
     /// assert!(set.insert("hello"));
     /// assert!(set.remove_by_iter("hello".bytes()));
     /// assert!(!set.remove_by_iter("hello".bytes()));
     /// ```
-    pub fn remove_by_iter<K>(&mut self, key: K) -> bool 
+    pub fn remove_by_iter<K>(&mut self, key: K) -> bool
     where
         K: Iterator<Item = u8>
     {
@@ -227,7 +236,7 @@ mod tests {
         let mut set = TrieSet::<26, b'a'>::new();
         assert!(set.insert("hello"));
         assert!(set.insert("world"));
-        assert_eq!(set.iter().collect::<Vec<_>>(), 
+        assert_eq!(set.iter().collect::<Vec<_>>(),
                    vec![bx("hello"), bx("world")]);
     }
 
@@ -236,7 +245,7 @@ mod tests {
         let mut set = TrieSet::<26, b'a'>::new();
         assert!(set.insert("hello"));
         assert!(set.insert("world"));
-        assert_eq!(set.iter().rev().collect::<Vec<_>>(), 
+        assert_eq!(set.iter().rev().collect::<Vec<_>>(),
                    vec![bx("world"), bx("hello")]);
     }
 
@@ -245,7 +254,7 @@ mod tests {
         let mut set = TrieSet::<26, b'a'>::new();
         assert!(set.insert("hello"));
         assert!(set.insert("world"));
-        assert_eq!(set.into_iter().collect::<Vec<_>>(), 
+        assert_eq!(set.into_iter().collect::<Vec<_>>(),
                    vec![bx("hello"), bx("world")]);
     }
 
@@ -254,8 +263,8 @@ mod tests {
         let mut set = TrieSet::<26, b'a'>::new();
         assert!(set.insert("hello"));
         assert!(set.insert("world"));
-        assert_eq!(format!("{:?}", set), 
-                   r#"{[104, 101, 108, 108, 111], "#.to_owned() 
+        assert_eq!(format!("{:?}", set),
+                   r#"{[104, 101, 108, 108, 111], "#.to_owned()
                    + r#"[119, 111, 114, 108, 100]}"#);
     }
 }

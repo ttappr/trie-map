@@ -12,7 +12,7 @@ pub mod iterators;
 /// This module provides the `TrieMapBase16` and `TrieSetBase16` types, which
 /// are specialized versions of `TrieMap` and `TrieSet` that use base-16
 /// encoding for their keys.
-/// 
+///
 pub mod base16 {
     pub use crate::trie_map_base16::TrieMapBase16;
     pub use crate::trie_set_base16::TrieSetBase16;
