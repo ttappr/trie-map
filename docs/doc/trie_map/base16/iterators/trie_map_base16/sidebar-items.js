@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["IntoIter","Iter","IterMut","Keys","Values"]};
+window.SIDEBAR_ITEMS = {"struct":["IntoIter","Iter","IterMut","Keys","Values","ValuesMut"]};

@@ -11,7 +11,7 @@ pub use crate::trie_set::TrieSet;
 pub mod iterators {
     pub mod trie_map {
         pub use crate::trie_map_iterators::{
-            Iter, IterMut, IntoIter, Keys, Values,
+            Iter, IterMut, IntoIter, Keys, Values, ValuesMut,
         };
     }
     pub mod trie_set {
@@ -31,7 +31,7 @@ pub mod base16 {
     pub mod iterators {
         pub mod trie_map_base16 {
             pub use crate::trie_map_base16::{
-                Iter, IterMut, IntoIter, Keys, Values,
+                Iter, IterMut, IntoIter, Keys, Values, ValuesMut,
             };
         }
         pub mod trie_set_base16 {
