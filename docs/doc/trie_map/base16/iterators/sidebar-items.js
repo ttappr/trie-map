@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["trie_map_base16","trie_set_base16"]};

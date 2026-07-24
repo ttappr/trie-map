@@ -1,1 +1,0 @@
-window.SIDEBAR_ITEMS = {"mod":["iterators"],"struct":["TrieMapBase16","TrieSetBase16"]};
