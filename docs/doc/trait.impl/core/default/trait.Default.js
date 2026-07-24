@@ -1,0 +1,9 @@
+(function() {
+    const implementors = Object.fromEntries([["trie_map",[["impl <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"trie_map/base16/struct.TrieSetBase16.html\" title=\"struct trie_map::base16::TrieSetBase16\">TrieSetBase16</a>",0],["impl&lt;V&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"trie_map/base16/struct.TrieMapBase16.html\" title=\"struct trie_map::base16::TrieMapBase16\">TrieMapBase16</a>&lt;V&gt;",0],["impl&lt;V, const R: <a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.usize.html\">usize</a>, const B: <a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.u8.html\">u8</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"trie_map/struct.TrieMap.html\" title=\"struct trie_map::TrieMap\">TrieMap</a>&lt;V, R, B&gt;",0],["impl&lt;const R: <a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.usize.html\">usize</a>, const B: <a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.u8.html\">u8</a>&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/default/trait.Default.html\" title=\"trait core::default::Default\">Default</a> for <a class=\"struct\" href=\"trie_map/struct.TrieSet.html\" title=\"struct trie_map::TrieSet\">TrieSet</a>&lt;R, B&gt;",0]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":59,"fragment_lengths":[1624]}

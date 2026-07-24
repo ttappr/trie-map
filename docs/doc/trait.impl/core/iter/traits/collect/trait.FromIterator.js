@@ -1,0 +1,9 @@
+(function() {
+    const implementors = Object.fromEntries([["trie_map",[["impl&lt;V, S&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/iter/traits/collect/trait.FromIterator.html\" title=\"trait core::iter::traits::collect::FromIterator\">FromIterator</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.tuple.html\">(S, V)</a>&gt; for <a class=\"struct\" href=\"trie_map/base16/struct.TrieMapBase16.html\" title=\"struct trie_map::base16::TrieMapBase16\">TrieMapBase16</a>&lt;V&gt;<div class=\"where\">where\n    S: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/borrow/trait.Borrow.html\" title=\"trait core::borrow::Borrow\">Borrow</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.str.html\">str</a>&gt;,</div>",0],["impl&lt;V, const R: <a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.usize.html\">usize</a>, const B: <a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.u8.html\">u8</a>, K&gt; <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/iter/traits/collect/trait.FromIterator.html\" title=\"trait core::iter::traits::collect::FromIterator\">FromIterator</a>&lt;<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.tuple.html\">(K, V)</a>&gt; for <a class=\"struct\" href=\"trie_map/struct.TrieMap.html\" title=\"struct trie_map::TrieMap\">TrieMap</a>&lt;V, R, B&gt;<div class=\"where\">where\n    K: <a class=\"trait\" href=\"https://doc.rust-lang.org/1.97.1/core/convert/trait.AsRef.html\" title=\"trait core::convert::AsRef\">AsRef</a>&lt;[<a class=\"primitive\" href=\"https://doc.rust-lang.org/1.97.1/std/primitive.u8.html\">u8</a>]&gt;,</div>",0]]]]);
+    if (window.register_implementors) {
+        window.register_implementors(implementors);
+    } else {
+        window.pending_implementors = implementors;
+    }
+})()
+//{"start":59,"fragment_lengths":[1700]}
