@@ -209,11 +209,6 @@ impl<V, const RANGE: usize, const BASE_CHAR: u8> TrieMap<V, RANGE, BASE_CHAR> {
         for b in key {
             debug_assert!(b >= BASE_CHAR && b < BASE_CHAR + RANGE as u8);
             let ichild = (b - BASE_CHAR) as usize;
-            /*if let Some(hnext) = self.hderef(hcurr).child[ichild] {
-                hcurr = hnext;
-            } else {
-                return None;
-            }*/
             hcurr = self.hderef(hcurr).child[ichild]?;
         }
         if let Some(hvalue) = self.hderef(hcurr).value {
