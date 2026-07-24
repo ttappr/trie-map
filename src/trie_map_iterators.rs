@@ -46,8 +46,8 @@ trait IterBase<V, const R: usize, const B: u8> {
         }
         while let Some((hcurr, mut ichild, b)) = self.stack().pop() {
             let curr = self.hderef(hcurr);
-            if curr.value.is_some() && b {
-                let hval = curr.value.unwrap();
+            if let Some(value) = curr.value && b {
+                let hval = value;
                 let key  = self.key().clone().into_boxed_slice();
                 self.stack().push((hcurr, 0, false));
                 return self.item(hcurr, hval, key)

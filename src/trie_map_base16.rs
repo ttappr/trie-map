@@ -194,14 +194,14 @@ impl<V> TrieMapBase16<V> {
     /// Returns an iterator over the key-value pairs of the map in canonical
     /// order.
     ///
-    pub fn iter(&self) -> Iter<V> {
+    pub fn iter(&self) -> Iter<'_, V> {
         self.into_iter()
     }
 
     /// Returns an iterator over the key-value pairs of the map. The values
     /// are mutable.
     ///
-    pub fn iter_mut(&mut self) -> IterMut<V> {
+    pub fn iter_mut(&mut self) -> IterMut<'_, V> {
         self.into_iter()
     }
 
@@ -217,7 +217,7 @@ impl<V> TrieMapBase16<V> {
     /// let mut iter = trie.keys().rev();
     /// assert_eq!(iter.next(), Some("world".to_string()));
     /// ```
-    pub fn keys(&self) -> Keys<V> {
+    pub fn keys(&self) -> Keys<'_, V> {
         Keys::new(self.trie.keys())
     }
 
@@ -265,15 +265,21 @@ impl<V> TrieMapBase16<V> {
     /// Returns an iterator over the values of the map. They will be in the
     /// same order as the keys.
     ///
-    pub fn values(&self) -> Values<V> {
+    pub fn values(&self) -> Values<'_, V> {
         Values::new(self.trie.values())
     }
 
     /// Returns an iterator over the values of the map. They will be in the
     /// same order as the keys.
     /// 
-    pub fn values_mut(&mut self) -> ValuesMut<V> {
+    pub fn values_mut(&mut self) -> ValuesMut<'_, V> {
         ValuesMut::new(self.iter_mut())
+    }
+}
+
+impl<V> Default for TrieMapBase16<V> {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
@@ -439,13 +445,13 @@ impl<'a, V> Iterator for Keys<'a, V> {
     type Item = String;
 
     fn next(&mut self) -> Option<Self::Item> {
-        self.iter.next().map(|k| decode(k))
+        self.iter.next().map(decode)
     }
 }
 
 impl<'a, V> DoubleEndedIterator for Keys<'a, V> {
     fn next_back(&mut self) -> Option<Self::Item> {
-        self.iter.next_back().map(|k| decode(k))
+        self.iter.next_back().map(decode)
     }
 }
 

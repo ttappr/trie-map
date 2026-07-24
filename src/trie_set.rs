@@ -98,7 +98,7 @@ impl<const R: usize, const B: u8> TrieSet<R, B> {
 
     /// Returns an iterator over the keys of the set.
     ///
-    pub fn iter(&self) -> Iter<R, B> {
+    pub fn iter(&self) -> Iter<'_, R, B> {
         self.into_iter()
     }
 
@@ -162,7 +162,7 @@ impl<const R: usize, const B: u8> DoubleEndedIterator for IntoIter<R, B> {
     }
 }
 
-impl<'a, const R: usize, const B: u8> IntoIterator for TrieSet<R, B> {
+impl<const R: usize, const B: u8> IntoIterator for TrieSet<R, B> {
     type Item = Box<[u8]>;
     type IntoIter = IntoIter<R, B>;
 

@@ -84,7 +84,7 @@ impl TrieSetBase16 {
 
     /// Returns an iterator over the set.
     ///
-    pub fn iter(&self) -> Iter {
+    pub fn iter(&self) -> Iter<'_> {
         Iter { iter: self.trie.iter() }
     }
 
